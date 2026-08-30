@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eskuartean | Imaginería Festiva y Escultura Tradicional</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,600;0,800;1,400&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            terracotta: '#A0402B',
+            charcoal: '#222222',
+            parchment: '#FAF7F2',
+            gold: '#D4A359',
+            'terracotta-dark': '#833220',
+            'charcoal-light': '#2d2d2d'
+          },
+          fontFamily: {
+            heading: ['Cinzel', 'Playfair Display', 'serif'],
+            body: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      background-color: #FAF7F2;
+      color: #222222;
+      font-family: 'Inter', sans-serif;
+    }
+    .bg-texture {
+      background-image: radial-gradient(#A0402B 0.5px, transparent 0.5px), radial-gradient(#222222 0.5px, #FAF7F2 0.5px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+      opacity: 0.03;
+    }
+  </style>
+</head>
+<body class="relative antialiased selection:bg-terracotta selection:text-white">
+
+  <div class="fixed inset-0 pointer-events-none bg-texture z-50"></div>
+
+  <nav class="sticky top-0 z-40 bg-parchment/90 backdrop-blur-md border-b border-terracotta/10">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#" class="font-heading text-2xl font-bold tracking-wider text-charcoal">
+        ESKUARTEAN
+        <span class="block text-xs font-body font-normal tracking-widest text-terracotta uppercase">Imaginería Festiva</span>
+      </a>
+      
+      <div class="hidden md:flex items-center space-x-8 text-sm font-medium">
+        <a href="#taller" class="hover:text-terracotta transition-colors">El Taller</a>
+        <a href="#servicios" class="hover:text-terracotta transition-colors">Servicios</a>
+        <a href="#galeria" class="hover:text-terracotta transition-colors">Portafolio</a>
+        <a href="#proceso" class="hover:text-terracotta transition-colors">Proceso</a>
+        <a href="#contacto" class="px-5 py-2.5 bg-terracotta text-white rounded-sm hover:bg-terracotta-dark transition-colors font-semibold shadow-sm">Contactar</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="relative min-h-[85vh] flex items-center justify-center bg-charcoal text-parchment overflow-hidden">
+    <div class="absolute inset-0 z-0 opacity-40 mix-blend-overlay bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1920&q=80');"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/60 to-transparent z-0"></div>
+
+    <div class="relative z-10 max-w-5xl mx-auto px-6 text-center py-20">
+      <span class="inline-block text-gold text-sm font-semibold tracking-widest uppercase mb-4 border-b border-gold/40 pb-1">Escultura & Conservación Patrimonio</span>
+      <h1 class="font-heading text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-tight">
+        Artesanía, Tradición y Escultura Festiva
+      </h1>
+      <p class="text-lg md:text-xl text-parchment/80 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
+        Más de 10 años dando vida y restaurando gigantes, cabezudos e imaginería cultural con la maestría de la policromía y el modelado tradicional.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#galeria" class="w-full sm:w-auto px-8 py-4 bg-terracotta text-white font-semibold rounded-sm hover:bg-terracotta-dark transition-all shadow-lg text-center">
+          Ver Trabajos
+        </a>
+        <a href="#contacto" class="w-full sm:w-auto px-8 py-4 border border-parchment/30 text-parchment hover:border-gold hover:text-gold transition-all rounded-sm text-center">
+          Contactar con el Taller
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="taller" class="py-24 max-w-7xl mx-auto px-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <span class="text-terracotta font-semibold tracking-wider text-sm uppercase">El Taller & Trayectoria</span>
+        <h2 class="font-heading text-3xl md:text-4xl font-bold text-charcoal mt-2 mb-6">
+          Pasión por el detalle, respeto por nuestra historia
+        </h2>
+        <p class="text-charcoal/80 leading-relaxed mb-6">
+          En <strong>Eskuartean Imaginería Festiva</strong> aunamos técnicas de escultura clásica y materiales de alta resistencia para dar vida a las figuras que marcan la identidad de nuestras fiestas. Desde nuestro taller en Navarra, trabajamos para comparsas, ayuntamientos y colectivos de toda España.
+        </p>
+        <p class="text-charcoal/80 leading-relaxed mb-8">
+          Especializados en conservación e investigación histórica, devolvemos el esplendor a piezas centenarias garantizando la máxima fidelidad anatómica, ligereza en el porte y durabilidad.
+        </p>
+        
+        <div class="grid grid-cols-3 gap-6 pt-6 border-t border-terracotta/20">
+          <div>
+            <span class="block font-heading text-3xl font-bold text-terracotta">+10</span>
+            <span class="text-xs text-charcoal/70 uppercase tracking-wider">Años de experiencia</span>
+          </div>
+          <div>
+            <span class="block font-heading text-3xl font-bold text-terracotta">+100</span>
+            <span class="text-xs text-charcoal/70 uppercase tracking-wider">Obras Creadas</span>
+          </div>
+          <div>
+            <span class="block font-heading text-3xl font-bold text-terracotta">+150</span>
+            <span class="text-xs text-charcoal/70 uppercase tracking-wider">Piezas Restauradas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative">
+        <div class="aspect-square rounded-sm overflow-hidden shadow-2xl bg-charcoal-light">
+          <img src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=800&q=80" alt="Detalle del trabajo escultórico en el taller" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700">
+        </div>
+        <div class="absolute -bottom-6 -left-6 bg-gold text-charcoal p-6 hidden md:block shadow-xl max-w-xs">
+          <p class="font-heading font-bold text-sm">Patrimonio Histórico</p>
+          <p class="text-xs mt-1">Intervenciones en piezas monumentales de Pamplona, Donostia y Vitoria-Gasteiz.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="servicios" class="py-24 bg-charcoal text-parchment">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="text-gold font-semibold tracking-wider text-sm uppercase">Especialidades</span>
+        <h2 class="font-heading text-3xl md:text-4xl font-bold text-white mt-2">Nuestros Servicios</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="bg-charcoal-light p-8 border border-white/5 hover:border-gold/50 transition-all group">
+          <div class="w-12 h-12 bg-terracotta/20 text-gold flex items-center justify-center font-heading text-xl font-bold mb-6 group-hover:bg-terracotta group-hover:text-white transition-colors">01</div>
+          <h3 class="font-heading text-xl font-bold mb-3 text-white">Gigantes y Cabezudos</h3>
+          <p class="text-sm text-parchment/70 leading-relaxed">
+            Diseño y construcción de nuevas comparsas. Modelado personalizado, estructuras ligeras de fibra de vidrio o materiales tradicionales optimizados para el portador.
+          </p>
+        </div>
+
+        <div class="bg-charcoal-light p-8 border border-white/5 hover:border-gold/50 transition-all group">
+          <div class="w-12 h-12 bg-terracotta/20 text-gold flex items-center justify-center font-heading text-xl font-bold mb-6 group-hover:bg-terracotta group-hover:text-white transition-colors">02</div>
+          <h3 class="font-heading text-xl font-bold mb-3 text-white">Restauración y Conservación</h3>
+          <p class="text-sm text-parchment/70 leading-relaxed">
+            Recuperación de imaginería histórica, consolidación de estructuras, eliminación de repintes impropios y reintegración de policromías originales.
+          </p>
+        </div>
+
+        <div class="bg-charcoal-light p-8 border border-white/5 hover:border-gold/50 transition-all group">
+          <div class="w-12 h-12 bg-terracotta/20 text-gold flex items-center justify-center font-heading text-xl font-bold mb-6 group-hover:bg-terracotta group-hover:text-white transition-colors">03</div>
+          <h3 class="font-heading text-xl font-bold mb-3 text-white">Imaginería Religiosa</h3>
+          <p class="text-sm text-parchment/70 leading-relaxed">
+            Talla académica en madera, resina o escayola. Acabados al óleo finos, estofados en pan de oro y aplicación de postizos artesanales para culto y procesión.
+          </p>
+        </div>
+
+        <div class="bg-charcoal-light p-8 border border-white/5 hover:border-gold/50 transition-all group">
+          <div class="w-12 h-12 bg-terracotta/20 text-gold flex items-center justify-center font-heading text-xl font-bold mb-6 group-hover:bg-terracotta group-hover:text-white transition-colors">04</div>
+          <h3 class="font-heading text-xl font-bold mb-3 text-white">Atrezzo y Escenografía</h3>
+          <p class="text-sm text-parchment/70 leading-relaxed">
+            Escultura temática para artes escénicas, rodajes cinematográficos, reproducciones a escala y atrezzo utilitario de alta fidelidad.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="galeria" class="py-24 max-w-7xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+      <div>
+        <span class="text-terracotta font-semibold tracking-wider text-sm uppercase">Catálogo de Obras</span>
+        <h2 class="font-heading text-3xl md:text-4xl font-bold text-charcoal mt-2">Galería de Proyectos</h2>
+      </div>
+      <p class="text-charcoal/70 text-sm max-w-md mt-4 md:mt-0">
+        Una muestra de esculturas ex-novo y piezas históricas intervenidas en nuestro taller.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="group relative overflow-hidden bg-charcoal aspect-[3/4]">
+        <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80" alt="Detalle de policromía" class="w-full h-full object-cover opacity-90 group-hover:scale-105 group-hover:opacity-100 transition-all duration-500">
+        <div class="absolute inset-0 bg-gradient-to-t from-charcoal via-transparent to-transparent opacity-80"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-6">
+          <span class="text-gold text-xs font-semibold uppercase tracking-wider">Policromía & Acabados</span>
+          <h3 class="font-heading text-lg text-white font-bold">Detalle de rostro esculpido</h3>
+        </div>
+      </div>
+
+      <div class="group relative overflow-hidden bg-charcoal aspect-[3/4]">
+        <img src="https://images.unsplash.com/photo-1569172122301-bc5008bc09c5?auto=format&fit=crop&w=800&q=80" alt="Restauración de gigante" class="w-full h-full object-cover opacity-90 group-hover:scale-105 group-hover:opacity-100 transition-all duration-500">
+        <div class="absolute inset-0 bg-gradient-to-t from-charcoal via-transparent to-transparent opacity-80"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-6">
+          <span class="text-gold text-xs font-semibold uppercase tracking-wider">Restauración Histórica</span>
+          <h3 class="font-heading text-lg text-white font-bold">Consolidación de estructura del siglo XIX</h3>
+        </div>
+      </div>
+
+      <div class="group relative overflow-hidden bg-charcoal aspect-[3/4]">
+        <img src="https://images.unsplash.com/photo-1578926375605-eaf7559b1458?auto=format&fit=crop&w=800&q=80" alt="Creación de cabezudo" class="w-full h-full object-cover opacity-90 group-hover:scale-105 group-hover:opacity-100 transition-all duration-500">
+        <div class="absolute inset-0 bg-gradient-to-t from-charcoal via-transparent to-transparent opacity-80"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-6">
+          <span class="text-gold text-xs font-semibold uppercase tracking-wider">Obra Nueva</span>
+          <h3 class="font-heading text-lg text-white font-bold">Modelado de personaje para comparsa municipal</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="proceso" class="py-24 bg-parchment border-t border-terracotta/10">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="text-terracotta font-semibold tracking-wider text-sm uppercase">Método Artesanal</span>
+        <h2 class="font-heading text-3xl md:text-4xl font-bold text-charcoal mt-2">Paso a Paso en la Creación</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+        <div class="flex flex-col items-center text-center">
+          <div class="w-16 h-16 rounded-full bg-terracotta text-white font-heading font-bold text-xl flex items-center justify-center mb-4 shadow-md">1</div>
+          <h3 class="font-heading font-bold text-lg text-charcoal mb-2">Modelado</h3>
+          <p class="text-xs text-charcoal/70 leading-relaxed">Boceto y ejecución del volumen en barro o plastilina técnica para fijar rasgos y expresiones.</p>
+        </div>
+
+        <div class="flex flex-col items-center text-center">
+          <div class="w-16 h-16 rounded-full bg-terracotta text-white font-heading font-bold text-xl flex items-center justify-center mb-4 shadow-md">2</div>
+          <h3 class="font-heading font-bold text-lg text-charcoal mb-2">Moldes y Vaciado</h3>
+          <p class="text-xs text-charcoal/70 leading-relaxed">Obtención de moldes rígidos o flexibles y positivado en resina, fibra de vidrio o cartón piedra.</p>
+        </div>
+
+        <div class="flex flex-col items-center text-center">
+          <div class="w-16 h-16 rounded-full bg-terracotta text-white font-heading font-bold text-xl flex items-center justify-center mb-4 shadow-md">3</div>
+          <h3 class="font-heading font-bold text-lg text-charcoal mb-2">Policromía al Óleo</h3>
+          <p class="text-xs text-charcoal/70 leading-relaxed">Preparación de aparejos artesanales, encarnaciones y acabado clásico con veladuras finas al óleo.</p>
+        </div>
+
+        <div class="flex flex-col items-center text-center">
+          <div class="w-16 h-16 rounded-full bg-terracotta text-white font-heading font-bold text-xl flex items-center justify-center mb-4 shadow-md">4</div>
+          <h3 class="font-heading font-bold text-lg text-charcoal mb-2">Indumentaria</h3>
+          <p class="text-xs text-charcoal/70 leading-relaxed">Montaje de bastidores, adaptación de cabezales, confección de vestuario e integración de postizos.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contacto" class="py-24 bg-charcoal text-parchment relative">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        <div>
+          <span class="text-gold font-semibold tracking-wider text-sm uppercase">Ubicación y Consultas</span>
+          <h2 class="font-heading text-3xl md:text-4xl font-bold text-white mt-2 mb-6">Contacta con el Taller</h2>
+          <p class="text-parchment/70 mb-8 leading-relaxed">
+            ¿Tienes un proyecto de obra nueva o necesitas un informe de conservación para tus figuras? Atendemos con cita previa en nuestras instalaciones.
+          </p>
+
+          <div class="space-y-6 text-sm">
+            <div class="flex items-start space-x-4">
+              <div class="text-gold font-bold">Dirección:</div>
+              <div class="text-parchment/80">Polígono Industrial Morea Sur, Calle D, Beriáin, Navarra (España)</div>
+            </div>
+            <div class="flex items-start space-x-4">
+              <div class="text-gold font-bold">Horario:</div>
+              <div class="text-parchment/80">Lunes a Viernes: 08:00 - 17:00 h</div>
+            </div>
+            <div class="flex items-start space-x-4">
+              <div class="text-gold font-bold">Atención:</div>
+              <div class="text-parchment/80">Consultoría técnica para Ayuntamientos, Comparsas y Cofradías.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-charcoal-light p-8 border border-white/10 rounded-sm">
+          <form class="space-y-4" onsubmit="event.preventDefault();">
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-parchment/80 mb-2">Nombre Completo / Entidad</label>
+              <input type="text" class="w-full bg-charcoal border border-white/20 p-3 text-white focus:border-gold outline-none transition-colors" placeholder="Ej. Comparsa de Gigantes / Nombre">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-parchment/80 mb-2">Correo Electrónico</label>
+              <input type="email" class="w-full bg-charcoal border border-white/20 p-3 text-white focus:border-gold outline-none transition-colors" placeholder="correo@ejemplo.com">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-parchment/80 mb-2">Mensaje / Proyecto</label>
+              <textarea rows="4" class="w-full bg-charcoal border border-white/20 p-3 text-white focus:border-gold outline-none transition-colors" placeholder="Describe brevemente la obra o restauración requerida..."></textarea>
+            </div>
+            <button type="submit" class="w-full py-4 bg-terracotta text-white font-semibold hover:bg-terracotta-dark transition-colors uppercase tracking-wider text-xs">
+              Enviar Solicitud
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-black text-parchment/60 py-8 border-t border-white/10 text-xs">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p>&copy; Eskuartean Imaginería Festiva. Todos los derechos reservados.</p>
+      <p class="text-right">Beriáin, Navarra</p>
+    </div>
+  </footer>
+
+</body>
+</html>
