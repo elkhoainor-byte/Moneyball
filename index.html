@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reparto proporcional de gastos</title>
+  <title>Reparto proporcional de gastos – Jess & Joel</title>
   <style>
     :root {
       --primary: #2563eb;
@@ -16,11 +16,7 @@
       --danger: #dc2626;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -28,15 +24,11 @@
       color: var(--text);
       line-height: 1.5;
       padding: 20px;
-      max-width: 860px;
+      max-width: 900px;
       margin: 0 auto;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 6px;
-      font-size: 1.6rem;
-    }
+    h1 { text-align: center; margin-bottom: 6px; font-size: 1.6rem; }
 
     .subtitle {
       text-align: center;
@@ -67,9 +59,7 @@
     }
 
     @media (max-width: 600px) {
-      .grid-2 {
-        grid-template-columns: 1fr;
-      }
+      .grid-2 { grid-template-columns: 1fr; }
     }
 
     label {
@@ -81,7 +71,8 @@
     }
 
     input[type="text"],
-    input[type="number"] {
+    input[type="number"],
+    select {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid var(--border);
@@ -90,13 +81,13 @@
       background: #fff;
     }
 
-    input:focus {
+    input:focus, select:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
     }
 
-    input:disabled {
+    input:disabled, select:disabled {
       background: #f1f5f9;
       color: #64748b;
       cursor: not-allowed;
@@ -116,19 +107,9 @@
       transition: background 0.15s;
     }
 
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: #1d4ed8;
-    }
-
-    .btn-primary:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
 
     .btn-danger {
       background: #fee2e2;
@@ -136,10 +117,7 @@
       padding: 6px 10px;
       font-size: 0.85rem;
     }
-
-    .btn-danger:hover {
-      background: #fecaca;
-    }
+    .btn-danger:hover { background: #fecaca; }
 
     .btn-secondary {
       background: #e2e8f0;
@@ -147,27 +125,19 @@
       padding: 8px 14px;
       font-size: 0.9rem;
     }
-
-    .btn-secondary:hover {
-      background: #cbd5e1;
-    }
-
-    .btn-secondary.active {
-      background: var(--primary);
-      color: white;
-    }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .btn-secondary.active { background: var(--primary); color: white; }
 
     .form-row {
       display: flex;
       gap: 10px;
       margin-top: 12px;
       flex-wrap: wrap;
+      align-items: flex-end;
     }
 
-    .form-row input {
-      flex: 1;
-      min-width: 120px;
-    }
+    .form-row > * { flex: 1; min-width: 120px; }
+    .form-row .btn { flex: 0 0 auto; }
 
     table {
       width: 100%;
@@ -179,10 +149,11 @@
       padding: 10px 8px;
       text-align: left;
       border-bottom: 1px solid var(--border);
+      vertical-align: middle;
     }
 
     th {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       text-transform: uppercase;
       letter-spacing: 0.03em;
       color: var(--muted);
@@ -214,10 +185,7 @@
       margin-bottom: 4px;
     }
 
-    .stat .value {
-      font-size: 1.2rem;
-      font-weight: 600;
-    }
+    .stat .value { font-size: 1.2rem; font-weight: 600; }
 
     .positive { color: var(--success); }
     .negative { color: var(--danger); }
@@ -248,45 +216,62 @@
       gap: 8px;
     }
 
-    .modo-lectura {
-      opacity: 0.85;
+    .deuda-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+
+    .deuda-box.debe { background: #fef2f2; color: var(--danger); }
+    .deuda-box.saldado { background: #f0fdf4; color: var(--success); }
+
+    .checkbox-cell { text-align: center; }
+    .checkbox-cell input { width: 18px; height: 18px; cursor: pointer; }
+
+    .bloqueado-msg {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 6px;
     }
   </style>
 </head>
 <body>
 
   <h1>Reparto proporcional de gastos</h1>
-  <p class="subtitle" id="subtitle">Jess & Joel · Gastos repartidos según el peso de sus ingresos</p>
+  <p class="subtitle" id="subtitle">Jess & Joel</p>
 
   <!-- Índice de meses -->
   <div class="card">
     <h2>Índice de meses guardados</h2>
-    <div class="meses-lista" id="listaMeses">
-      <!-- Se rellena con JS -->
-    </div>
+    <div class="meses-lista" id="listaMeses"></div>
   </div>
 
   <!-- Aviso modo histórico -->
   <div class="aviso-historico" id="avisoHistorico">
-    Estás viendo un mes pasado (solo lectura). 
+    Estás viendo un mes pasado (solo lectura).
     <button class="btn btn-secondary" style="margin-left:10px" onclick="volverAlMesActual()">Volver al mes actual</button>
   </div>
 
   <!-- Ingresos -->
   <div class="card" id="cardIngresos">
-    <h2 id="tituloIngresos">1. Ingresos del mes anterior</h2>
+    <h2 id="tituloIngresos">1. Ingresos del mes</h2>
     <div class="grid-2">
       <div>
         <label for="ingreso1" id="labelJess">Jess – Lo que cobró</label>
         <input type="number" id="ingreso1" min="0" step="0.01" placeholder="0.00" value="0">
+        <div class="bloqueado-msg" id="msgBloqueoJess" style="display:none">🔒 Bloqueado hasta el próximo mes</div>
       </div>
       <div>
         <label for="ingreso2" id="labelJoel">Joel – Lo que cobró</label>
         <input type="number" id="ingreso2" min="0" step="0.01" placeholder="0.00" value="0">
+        <div class="bloqueado-msg" id="msgBloqueoJoel" style="display:none">🔒 Bloqueado hasta el próximo mes</div>
       </div>
     </div>
     <div class="aviso" id="avisoIngresos">
-      ⚠️ Ambos ingresos son 0. No se puede calcular proporción. Introduce al menos un valor.
+      ⚠️ Ambos ingresos son 0. No se puede calcular proporción.
     </div>
   </div>
 
@@ -294,9 +279,24 @@
   <div class="card" id="cardAñadir">
     <h2>2. Añadir gasto</h2>
     <div class="form-row">
-      <input type="text" id="descGasto" placeholder="Descripción del gasto">
-      <input type="number" id="montoGasto" min="0" step="0.01" placeholder="Monto">
-      <button class="btn btn-primary" id="btnAñadir" onclick="agregarGasto()">Añadir</button>
+      <div>
+        <label>Descripción</label>
+        <input type="text" id="descGasto" placeholder="Descripción del gasto">
+      </div>
+      <div>
+        <label>Monto (€)</label>
+        <input type="number" id="montoGasto" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div>
+        <label>Pagado por</label>
+        <select id="pagadoPor">
+          <option value="jess">Jess</option>
+          <option value="joel">Joel</option>
+        </select>
+      </div>
+      <div>
+        <button class="btn btn-primary" id="btnAñadir" onclick="agregarGasto()">Añadir</button>
+      </div>
     </div>
   </div>
 
@@ -311,9 +311,416 @@
   <!-- Resumen -->
   <div class="card">
     <h2>4. Resumen proporcional</h2>
-    <div class="summary-grid" id="resumen">
-      <!-- Se rellena con JS -->
+    <div class="summary-grid" id="resumen"></div>
+
+    <!-- Deuda -->
+    <div id="deudaBox" class="deuda-box saldado">
+      Introduce ingresos y gastos para ver quién debe a quién
     </div>
   </div>
 
-  <
+  <script>
+    const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+    let gastos = [];
+    let mesActualKey = null;
+    let mesVisualizadoKey = null;
+    let esModoHistorico = false;
+
+    const ingreso1 = document.getElementById('ingreso1');
+    const ingreso2 = document.getElementById('ingreso2');
+    const descGasto = document.getElementById('descGasto');
+    const montoGasto = document.getElementById('montoGasto');
+    const pagadoPor = document.getElementById('pagadoPor');
+    const listaGastos = document.getElementById('listaGastos');
+    const resumen = document.getElementById('resumen');
+    const avisoIngresos = document.getElementById('avisoIngresos');
+    const avisoHistorico = document.getElementById('avisoHistorico');
+    const listaMeses = document.getElementById('listaMeses');
+    const btnAñadir = document.getElementById('btnAñadir');
+    const deudaBox = document.getElementById('deudaBox');
+
+    // ========== MES ==========
+    function getMesAnterior() {
+      const ahora = new Date();
+      const prev = new Date(ahora.getFullYear(), ahora.getMonth() - 1, 1);
+      const nombre = MESES[prev.getMonth()];
+      const año = prev.getFullYear();
+      const key = `${año}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
+      return { nombre, año, key, texto: `${nombre} ${año}` };
+    }
+
+    function keyToTexto(key) {
+      const [año, mes] = key.split('-');
+      return `${MESES[parseInt(mes) - 1]} ${año}`;
+    }
+
+    // ========== STORAGE ==========
+    function obtenerTodosLosMeses() {
+      try {
+        return JSON.parse(localStorage.getItem('repartoGastosHistorico') || '{}');
+      } catch { return {}; }
+    }
+
+    function guardarMes(key, data) {
+      const todos = obtenerTodosLosMeses();
+      todos[key] = data;
+      localStorage.setItem('repartoGastosHistorico', JSON.stringify(todos));
+    }
+
+    function cargarMes(key) {
+      return obtenerTodosLosMeses()[key] || null;
+    }
+
+    function guardarDatosActuales() {
+      if (esModoHistorico) return;
+      guardarMes(mesVisualizadoKey, {
+        ingreso1: ingreso1.value,
+        ingreso2: ingreso2.value,
+        gastos: gastos
+      });
+      renderIndiceMeses();
+    }
+
+    // ========== ÍNDICE ==========
+    function renderIndiceMeses() {
+      const todos = obtenerTodosLosMeses();
+      const keys = Object.keys(todos).sort().reverse();
+
+      if (keys.length === 0) {
+        listaMeses.innerHTML = '<p class="empty">Todavía no hay meses guardados</p>';
+        return;
+      }
+
+      listaMeses.innerHTML = keys.map(key => {
+        const esActual = key === mesActualKey;
+        const esVisualizado = key === mesVisualizadoKey;
+        const clase = esVisualizado ? 'btn-secondary active' : 'btn-secondary';
+        const etiqueta = esActual ? `${keyToTexto(key)} (actual)` : keyToTexto(key);
+        return `<button class="btn ${clase}" onclick="cargarMesEnVista('${key}')">${etiqueta}</button>`;
+      }).join('');
+    }
+
+    // ========== CARGAR MES ==========
+    function cargarMesEnVista(key) {
+      const data = cargarMes(key);
+      mesVisualizadoKey = key;
+      esModoHistorico = (key !== mesActualKey);
+
+      if (data) {
+        ingreso1.value = data.ingreso1 || 0;
+        ingreso2.value = data.ingreso2 || 0;
+        gastos = data.gastos || [];
+      } else {
+        ingreso1.value = 0;
+        ingreso2.value = 0;
+        gastos = [];
+      }
+
+      actualizarUIModo();
+      aplicarBloqueoIngresos();
+      renderGastos();
+      actualizarResumen();
+      renderIndiceMeses();
+    }
+
+    function volverAlMesActual() {
+      cargarMesEnVista(mesActualKey);
+    }
+
+    function actualizarUIModo() {
+      const mesTexto = keyToTexto(mesVisualizadoKey);
+      document.getElementById('subtitle').textContent = `Jess & Joel · ${mesTexto}`;
+      document.getElementById('tituloIngresos').textContent = `1. Ingresos de ${mesTexto}`;
+      document.getElementById('labelJess').textContent = `Jess – Lo que cobró en ${mesTexto.split(' ')[0]}`;
+      document.getElementById('labelJoel').textContent = `Joel – Lo que cobró en ${mesTexto.split(' ')[0]}`;
+
+      const deshabilitar = esModoHistorico;
+      descGasto.disabled = deshabilitar;
+      montoGasto.disabled = deshabilitar;
+      pagadoPor.disabled = deshabilitar;
+      btnAñadir.disabled = deshabilitar;
+
+      avisoHistorico.style.display = esModoHistorico ? 'block' : 'none';
+      document.getElementById('cardAñadir').style.display = esModoHistorico ? 'none' : 'block';
+    }
+
+    // ========== BLOQUEO DE INGRESOS ==========
+    function aplicarBloqueoIngresos() {
+      const i1 = parseFloat(ingreso1.value) || 0;
+      const i2 = parseFloat(ingreso2.value) || 0;
+
+      // Se bloquean si ya tienen valor y no estamos en modo histórico de otro mes
+      // (en histórico también están bloqueados por el modo lectura)
+      const bloquearJess = esModoHistorico || i1 > 0;
+      const bloquearJoel = esModoHistorico || i2 > 0;
+
+      ingreso1.disabled = bloquearJess;
+      ingreso2.disabled = bloquearJoel;
+
+      document.getElementById('msgBloqueoJess').style.display = (!esModoHistorico && i1 > 0) ? 'block' : 'none';
+      document.getElementById('msgBloqueoJoel').style.display = (!esModoHistorico && i2 > 0) ? 'block' : 'none';
+    }
+
+    // ========== LÓGICA MES ==========
+    function comprobarYActualizarMes() {
+      const mes = getMesAnterior();
+
+      if (!mesActualKey || mesActualKey !== mes.key) {
+        mesActualKey = mes.key;
+        if (!cargarMes(mes.key)) {
+          guardarMes(mes.key, { ingreso1: 0, ingreso2: 0, gastos: [] });
+        }
+      }
+
+      if (!mesVisualizadoKey) {
+        cargarMesEnVista(mesActualKey);
+      } else {
+        renderIndiceMeses();
+      }
+    }
+
+    // ========== EVENTOS INGRESOS ==========
+    ingreso1.addEventListener('change', () => {
+      if (esModoHistorico) return;
+      // Al cambiar y tener valor, se bloquea
+      aplicarBloqueoIngresos();
+      actualizarResumen();
+      guardarDatosActuales();
+    });
+
+    ingreso2.addEventListener('change', () => {
+      if (esModoHistorico) return;
+      aplicarBloqueoIngresos();
+      actualizarResumen();
+      guardarDatosActuales();
+    });
+
+    // También escuchamos input para el resumen en tiempo real (mientras se escribe)
+    ingreso1.addEventListener('input', () => { if (!esModoHistorico) actualizarResumen(); });
+    ingreso2.addEventListener('input', () => { if (!esModoHistorico) actualizarResumen(); });
+
+    descGasto.addEventListener('keypress', e => { if (e.key === 'Enter') agregarGasto(); });
+    montoGasto.addEventListener('keypress', e => { if (e.key === 'Enter') agregarGasto(); });
+
+    // ========== GASTOS ==========
+    function agregarGasto() {
+      if (esModoHistorico) return;
+
+      const desc = descGasto.value.trim();
+      const monto = parseFloat(montoGasto.value);
+      const quien = pagadoPor.value;
+
+      if (!desc || isNaN(monto) || monto <= 0) {
+        alert('Introduce una descripción y un monto válido.');
+        return;
+      }
+
+      gastos.push({
+        id: Date.now(),
+        descripcion: desc,
+        monto: monto,
+        pagadoPor: quien,       // "jess" o "joel"
+        liquidado: false
+      });
+
+      descGasto.value = '';
+      montoGasto.value = '';
+      descGasto.focus();
+
+      renderGastos();
+      actualizarResumen();
+      guardarDatosActuales();
+    }
+
+    function eliminarGasto(id) {
+      if (esModoHistorico) return;
+      gastos = gastos.filter(g => g.id !== id);
+      renderGastos();
+      actualizarResumen();
+      guardarDatosActuales();
+    }
+
+    function toggleLiquidado(id) {
+      if (esModoHistorico) return;
+      const g = gastos.find(x => x.id === id);
+      if (g) {
+        g.liquidado = !g.liquidado;
+        renderGastos();
+        guardarDatosActuales();
+      }
+    }
+
+    function obtenerProporciones() {
+      const i1 = parseFloat(ingreso1.value) || 0;
+      const i2 = parseFloat(ingreso2.value) || 0;
+      const total = i1 + i2;
+
+      if (total === 0) return { p1: 0.5, p2: 0.5, total: 0, valido: false };
+
+      return {
+        p1: i1 / total,
+        p2: i2 / total,
+        total,
+        valido: true
+      };
+    }
+
+    function renderGastos() {
+      if (gastos.length === 0) {
+        listaGastos.innerHTML = '<p class="empty">Aún no hay gastos</p>';
+        return;
+      }
+
+      const { p1, p2, valido } = obtenerProporciones();
+
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>Descripción</th>
+              <th>Monto</th>
+              <th>Pagado por</th>
+              <th>Jess</th>
+              <th>Joel</th>
+              <th>Pagado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      gastos.forEach(g => {
+        const parte1 = valido ? (g.monto * p1) : (g.monto / 2);
+        const parte2 = valido ? (g.monto * p2) : (g.monto / 2);
+        const quien = g.pagadoPor === 'jess' ? 'Jess' : 'Joel';
+
+        html += `
+          <tr style="${g.liquidado ? 'opacity:0.55' : ''}">
+            <td>${escapeHtml(g.descripcion)}</td>
+            <td>${g.monto.toFixed(2)} €</td>
+            <td>${quien}</td>
+            <td>${parte1.toFixed(2)} €</td>
+            <td>${parte2.toFixed(2)} €</td>
+            <td class="checkbox-cell">
+              <input type="checkbox" ${g.liquidado ? 'checked' : ''} 
+                     ${esModoHistorico ? 'disabled' : ''}
+                     onchange="toggleLiquidado(${g.id})">
+            </td>
+            <td>
+              ${esModoHistorico ? '' : `<button class="btn btn-danger" onclick="eliminarGasto(${g.id})">Eliminar</button>`}
+            </td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      listaGastos.innerHTML = html;
+    }
+
+    function actualizarResumen() {
+      const i1 = parseFloat(ingreso1.value) || 0;
+      const i2 = parseFloat(ingreso2.value) || 0;
+      const { p1, p2, total, valido } = obtenerProporciones();
+
+      avisoIngresos.style.display = valido ? 'none' : 'block';
+
+      const totalGastos = gastos.reduce((sum, g) => sum + g.monto, 0);
+      const parte1 = valido ? totalGastos * p1 : totalGastos / 2;
+      const parte2 = valido ? totalGastos * p2 : totalGastos / 2;
+
+      // Cuánto ha pagado realmente cada uno
+      let pagadoJess = 0;
+      let pagadoJoel = 0;
+      gastos.forEach(g => {
+        if (g.pagadoPor === 'jess') pagadoJess += g.monto;
+        else pagadoJoel += g.monto;
+      });
+
+      const residual1 = i1 - parte1;
+      const residual2 = i2 - parte2;
+
+      // Balance de deuda: positivo = le deben, negativo = debe
+      const balanceJess = pagadoJess - parte1;
+
+      resumen.innerHTML = `
+        <div class="stat">
+          <div class="label">Total ingresos</div>
+          <div class="value">${total.toFixed(2)} €</div>
+        </div>
+        <div class="stat">
+          <div class="label">% Jess</div>
+          <div class="value">${(p1 * 100).toFixed(1)} %</div>
+        </div>
+        <div class="stat">
+          <div class="label">% Joel</div>
+          <div class="value">${(p2 * 100).toFixed(1)} %</div>
+        </div>
+        <div class="stat">
+          <div class="label">Total gastos</div>
+          <div class="value">${totalGastos.toFixed(2)} €</div>
+        </div>
+        <div class="stat">
+          <div class="label">Parte justa Jess</div>
+          <div class="value">${parte1.toFixed(2)} €</div>
+        </div>
+        <div class="stat">
+          <div class="label">Parte justa Joel</div>
+          <div class="value">${parte2.toFixed(2)} €</div>
+        </div>
+        <div class="stat">
+          <div class="label">Ha pagado Jess</div>
+          <div class="value">${pagadoJess.toFixed(2)} €</div>
+        </div>
+        <div class="stat">
+          <div class="label">Ha pagado Joel</div>
+          <div class="value">${pagadoJoel.toFixed(2)} €</div>
+        </div>
+        <div class="stat">
+          <div class="label">Residual Jess</div>
+          <div class="value ${residual1 >= 0 ? 'positive' : 'negative'}">${residual1.toFixed(2)} €</div>
+        </div>
+        <div class="stat">
+          <div class="label">Residual Joel</div>
+          <div class="value ${residual2 >= 0 ? 'positive' : 'negative'}">${residual2.toFixed(2)} €</div>
+        </div>
+      `;
+
+      // Mostrar quién debe a quién
+      if (totalGastos === 0) {
+        deudaBox.className = 'deuda-box saldado';
+        deudaBox.textContent = 'Todavía no hay gastos';
+      } else if (Math.abs(balanceJess) < 0.01) {
+        deudaBox.className = 'deuda-box saldado';
+        deudaBox.textContent = '✅ Están equilibrados – nadie se debe nada';
+      } else if (balanceJess > 0) {
+        // Jess ha pagado de más → Joel le debe
+        deudaBox.className = 'deuda-box debe';
+        deudaBox.textContent = `Joel debe ${balanceJess.toFixed(2)} € a Jess`;
+      } else {
+        // Joel ha pagado de más → Jess le debe
+        deudaBox.className = 'deuda-box debe';
+        deudaBox.textContent = `Jess debe ${Math.abs(balanceJess).toFixed(2)} € a Joel`;
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ========== INICIO ==========
+    comprobarYActualizarMes();
+
+    setInterval(() => {
+      const mes = getMesAnterior();
+      if (mes.key !== mesActualKey) {
+        if (!esModoHistorico) guardarDatosActuales();
+        comprobarYActualizarMes();
+        if (!esModoHistorico) cargarMesEnVista(mes.key);
+      }
+    }, 60 * 1000);
+  </script>
+</body>
+</html>
