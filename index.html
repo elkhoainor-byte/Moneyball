@@ -227,6 +227,7 @@
 
     .deuda-box.debe { background: #fef2f2; color: var(--danger); }
     .deuda-box.saldado { background: #f0fdf4; color: var(--success); }
+    .deuda-box.te-deben { background: #ecfdf5; color: #047857; }
 
     .checkbox-cell { text-align: center; }
     .checkbox-cell input { width: 18px; height: 18px; cursor: pointer; }
@@ -236,12 +237,38 @@
       color: var(--muted);
       margin-top: 6px;
     }
+
+    /* Selector de usuario */
+    .usuario-selector {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .usuario-selector .btn {
+      min-width: 100px;
+    }
+    .usuario-actual {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-left: auto;
+    }
   </style>
 </head>
 <body>
 
   <h1>Reparto proporcional de gastos</h1>
   <p class="subtitle" id="subtitle">Jess & Joel</p>
+
+  <!-- Quién está usando la app -->
+  <div class="card">
+    <h2>¿Quién eres?</h2>
+    <div class="usuario-selector">
+      <button class="btn btn-secondary" id="btnSoyJess" onclick="elegirUsuario('jess')">Jess</button>
+      <button class="btn btn-secondary" id="btnSoyJoel" onclick="elegirUsuario('joel')">Joel</button>
+      <span class="usuario-actual" id="textoUsuarioActual">Elige quién eres para ver la deuda desde tu punto de vista</span>
+    </div>
+  </div>
 
   <!-- Índice de meses -->
   <div class="card">
@@ -326,6 +353,7 @@
     let mesActualKey = null;
     let mesVisualizadoKey = null;
     let esModoHistorico = false;
+    let usuarioActual = localStorage.getItem('repartoUsuarioActual') || null; // "jess" | "joel" | null
 
     const ingreso1 = document.getElementById('ingreso1');
     const ingreso2 = document.getElementById('ingreso2');
@@ -339,6 +367,31 @@
     const listaMeses = document.getElementById('listaMeses');
     const btnAñadir = document.getElementById('btnAñadir');
     const deudaBox = document.getElementById('deudaBox');
+
+    // ========== USUARIO ACTUAL ==========
+    function elegirUsuario(quien) {
+      usuarioActual = quien;
+      localStorage.setItem('repartoUsuarioActual', quien);
+      actualizarUIUsuario();
+      actualizarResumen(); // recalcula el mensaje de deuda
+    }
+
+    function actualizarUIUsuario() {
+      const btnJess = document.getElementById('btnSoyJess');
+      const btnJoel = document.getElementById('btnSoyJoel');
+      const texto = document.getElementById('textoUsuarioActual');
+
+      btnJess.classList.toggle('active', usuarioActual === 'jess');
+      btnJoel.classList.toggle('active', usuarioActual === 'joel');
+
+      if (usuarioActual === 'jess') {
+        texto.textContent = 'Estás viendo la app como Jess';
+      } else if (usuarioActual === 'joel') {
+        texto.textContent = 'Estás viendo la app como Joel';
+      } else {
+        texto.textContent = 'Elige quién eres para ver la deuda desde tu punto de vista';
+      }
+    }
 
     // ========== MES ==========
     function getMesAnterior() {
@@ -450,8 +503,6 @@
       const i1 = parseFloat(ingreso1.value) || 0;
       const i2 = parseFloat(ingreso2.value) || 0;
 
-      // Se bloquean si ya tienen valor y no estamos en modo histórico de otro mes
-      // (en histórico también están bloqueados por el modo lectura)
       const bloquearJess = esModoHistorico || i1 > 0;
       const bloquearJoel = esModoHistorico || i2 > 0;
 
@@ -483,7 +534,6 @@
     // ========== EVENTOS INGRESOS ==========
     ingreso1.addEventListener('change', () => {
       if (esModoHistorico) return;
-      // Al cambiar y tener valor, se bloquea
       aplicarBloqueoIngresos();
       actualizarResumen();
       guardarDatosActuales();
@@ -496,7 +546,6 @@
       guardarDatosActuales();
     });
 
-    // También escuchamos input para el resumen en tiempo real (mientras se escribe)
     ingreso1.addEventListener('input', () => { if (!esModoHistorico) actualizarResumen(); });
     ingreso2.addEventListener('input', () => { if (!esModoHistorico) actualizarResumen(); });
 
@@ -520,7 +569,7 @@
         id: Date.now(),
         descripcion: desc,
         monto: monto,
-        pagadoPor: quien,       // "jess" o "joel"
+        pagadoPor: quien,
         liquidado: false
       });
 
@@ -629,7 +678,6 @@
       const parte1 = valido ? totalGastos * p1 : totalGastos / 2;
       const parte2 = valido ? totalGastos * p2 : totalGastos / 2;
 
-      // Cuánto ha pagado realmente cada uno
       let pagadoJess = 0;
       let pagadoJoel = 0;
       gastos.forEach(g => {
@@ -640,7 +688,7 @@
       const residual1 = i1 - parte1;
       const residual2 = i2 - parte2;
 
-      // Balance de deuda: positivo = le deben, negativo = debe
+      // balanceJess > 0 → Jess ha pagado de más → Joel le debe
       const balanceJess = pagadoJess - parte1;
 
       resumen.innerHTML = `
@@ -686,21 +734,48 @@
         </div>
       `;
 
-      // Mostrar quién debe a quién
+      // Mensaje de deuda orientado según quién eres tú
       if (totalGastos === 0) {
         deudaBox.className = 'deuda-box saldado';
         deudaBox.textContent = 'Todavía no hay gastos';
       } else if (Math.abs(balanceJess) < 0.01) {
         deudaBox.className = 'deuda-box saldado';
         deudaBox.textContent = '✅ Están equilibrados – nadie se debe nada';
-      } else if (balanceJess > 0) {
-        // Jess ha pagado de más → Joel le debe
-        deudaBox.className = 'deuda-box debe';
-        deudaBox.textContent = `Joel debe ${balanceJess.toFixed(2)} € a Jess`;
       } else {
-        // Joel ha pagado de más → Jess le debe
-        deudaBox.className = 'deuda-box debe';
-        deudaBox.textContent = `Jess debe ${Math.abs(balanceJess).toFixed(2)} € a Joel`;
+        const cantidad = Math.abs(balanceJess).toFixed(2);
+        // balanceJess > 0 → Joel debe a Jess
+        // balanceJess < 0 → Jess debe a Joel
+
+        if (!usuarioActual) {
+          // Sin usuario elegido → mensaje neutral (como antes)
+          deudaBox.className = 'deuda-box debe';
+          if (balanceJess > 0) {
+            deudaBox.textContent = `Joel debe ${cantidad} € a Jess`;
+          } else {
+            deudaBox.textContent = `Jess debe ${cantidad} € a Joel`;
+          }
+        } else if (usuarioActual === 'jess') {
+          if (balanceJess > 0) {
+            // Tú (Jess) has pagado de más → te deben
+            deudaBox.className = 'deuda-box te-deben';
+            deudaBox.textContent = `Te deben ${cantidad} € (Joel te debe)`;
+          } else {
+            // Tú (Jess) debes
+            deudaBox.className = 'deuda-box debe';
+            deudaBox.textContent = `Debes ${cantidad} € a Joel`;
+          }
+        } else {
+          // usuarioActual === 'joel'
+          if (balanceJess < 0) {
+            // Tú (Joel) has pagado de más → te deben
+            deudaBox.className = 'deuda-box te-deben';
+            deudaBox.textContent = `Te deben ${cantidad} € (Jess te debe)`;
+          } else {
+            // Tú (Joel) debes
+            deudaBox.className = 'deuda-box debe';
+            deudaBox.textContent = `Debes ${cantidad} € a Jess`;
+          }
+        }
       }
     }
 
@@ -711,6 +786,7 @@
     }
 
     // ========== INICIO ==========
+    actualizarUIUsuario();
     comprobarYActualizarMes();
 
     setInterval(() => {
