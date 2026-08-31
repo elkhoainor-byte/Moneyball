@@ -209,18 +209,18 @@
 <body>
 
   <h1>Reparto proporcional de gastos</h1>
-  <p class="subtitle">Dos usuarios · Gastos repartidos según el peso de sus ingresos</p>
+  <p class="subtitle" id="subtitle">Jess & Joel · Gastos repartidos según el peso de sus ingresos</p>
 
   <!-- Ingresos -->
   <div class="card">
-    <h2>1. Ingresos del mes anterior</h2>
+    <h2 id="tituloIngresos">1. Ingresos del mes anterior</h2>
     <div class="grid-2">
       <div>
-        <label for="ingreso1">Jess – Lo que cobró</label>
+        <label for="ingreso1" id="labelJess">Jess – Lo que cobró</label>
         <input type="number" id="ingreso1" min="0" step="0.01" placeholder="0.00" value="0">
       </div>
       <div>
-        <label for="ingreso2">Joel – Lo que cobró</label>
+        <label for="ingreso2" id="labelJoel">Joel – Lo que cobró</label>
         <input type="number" id="ingreso2" min="0" step="0.01" placeholder="0.00" value="0">
       </div>
     </div>
@@ -256,7 +256,25 @@
   </div>
 
   <script>
+    // ========== MES ANTERIOR REAL ==========
+    const MESES = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+
+    function getMesAnterior() {
+      const ahora = new Date();
+      const prev = new Date(ahora.getFullYear(), ahora.getMonth() - 1, 1);
+      const nombre = MESES[prev.getMonth()];
+      const año = prev.getFullYear();
+      // Clave única para detectar cambio de mes (ej: "2026-07")
+      const key = `${año}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
+      return { nombre, año, key, texto: `${nombre} ${año}` };
+    }
+
+    // ========== DATOS ==========
     let gastos = [];
+    let mesActualKey = null;
 
     const ingreso1 = document.getElementById('ingreso1');
     const ingreso2 = document.getElementById('ingreso2');
@@ -266,8 +284,82 @@
     const resumen = document.getElementById('resumen');
     const avisoIngresos = document.getElementById('avisoIngresos');
 
-    ingreso1.addEventListener('input', actualizarTodo);
-    ingreso2.addEventListener('input', actualizarTodo);
+    // ========== LOCALSTORAGE ==========
+    function guardarDatos() {
+      const data = {
+        mesKey: mesActualKey,
+        ingreso1: ingreso1.value,
+        ingreso2: ingreso2.value,
+        gastos: gastos
+      };
+      localStorage.setItem('repartoGastos', JSON.stringify(data));
+    }
+
+    function cargarDatos() {
+      const guardado = localStorage.getItem('repartoGastos');
+      if (!guardado) return false;
+
+      try {
+        const data = JSON.parse(guardado);
+        if (data.mesKey === mesActualKey) {
+          ingreso1.value = data.ingreso1 || 0;
+          ingreso2.value = data.ingreso2 || 0;
+          gastos = data.gastos || [];
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    function resetearDatos() {
+      gastos = [];
+      ingreso1.value = 0;
+      ingreso2.value = 0;
+      guardarDatos();
+    }
+
+    // ========== ACTUALIZAR MES Y UI ==========
+    function actualizarMes() {
+      const mes = getMesAnterior();
+
+      // Si cambió el mes → reset automático
+      if (mesActualKey && mesActualKey !== mes.key) {
+        resetearDatos();
+      }
+
+      mesActualKey = mes.key;
+
+      // Actualizar textos
+      document.getElementById('subtitle').textContent =
+        `Jess & Joel · Gastos de ${mes.texto} repartidos según ingresos`;
+
+      document.getElementById('tituloIngresos').textContent =
+        `1. Ingresos de ${mes.texto}`;
+
+      document.getElementById('labelJess').textContent =
+        `Jess – Lo que cobró en ${mes.nombre}`;
+
+      document.getElementById('labelJoel').textContent =
+        `Joel – Lo que cobró en ${mes.nombre}`;
+
+      // Cargar datos del mes actual (o dejar en cero si es nuevo)
+      if (!cargarDatos()) {
+        guardarDatos(); // guardar el nuevo mes vacío
+      }
+
+      renderGastos();
+      actualizarResumen();
+    }
+
+    // ========== LÓGICA DE GASTOS ==========
+    ingreso1.addEventListener('input', () => {
+      actualizarResumen();
+      guardarDatos();
+    });
+    ingreso2.addEventListener('input', () => {
+      actualizarResumen();
+      guardarDatos();
+    });
 
     descGasto.addEventListener('keypress', e => { if (e.key === 'Enter') agregarGasto(); });
     montoGasto.addEventListener('keypress', e => { if (e.key === 'Enter') agregarGasto(); });
@@ -293,12 +385,14 @@
 
       renderGastos();
       actualizarResumen();
+      guardarDatos();
     }
 
     function eliminarGasto(id) {
       gastos = gastos.filter(g => g.id !== id);
       renderGastos();
       actualizarResumen();
+      guardarDatos();
     }
 
     function obtenerProporciones() {
@@ -332,8 +426,8 @@
             <tr>
               <th>Descripción</th>
               <th>Monto</th>
-              <th>Usuario 1</th>
-              <th>Usuario 2</th>
+              <th>Jess</th>
+              <th>Joel</th>
               <th></th>
             </tr>
           </thead>
@@ -381,11 +475,11 @@
           <div class="value">${total.toFixed(2)} €</div>
         </div>
         <div class="stat">
-          <div class="label">% Usuario 1</div>
+          <div class="label">% Jess</div>
           <div class="value">${(p1 * 100).toFixed(1)} %</div>
         </div>
         <div class="stat">
-          <div class="label">% Usuario 2</div>
+          <div class="label">% Joel</div>
           <div class="value">${(p2 * 100).toFixed(1)} %</div>
         </div>
         <div class="stat">
@@ -393,31 +487,26 @@
           <div class="value">${totalGastos.toFixed(2)} €</div>
         </div>
         <div class="stat">
-          <div class="label">Parte Usuario 1</div>
+          <div class="label">Parte Jess</div>
           <div class="value">${parte1.toFixed(2)} €</div>
         </div>
         <div class="stat">
-          <div class="label">Parte Usuario 2</div>
+          <div class="label">Parte Joel</div>
           <div class="value">${parte2.toFixed(2)} €</div>
         </div>
         <div class="stat">
-          <div class="label">Residual Usuario 1</div>
+          <div class="label">Residual Jess</div>
           <div class="value ${residual1 >= 0 ? 'positive' : 'negative'}">
             ${residual1.toFixed(2)} €
           </div>
         </div>
         <div class="stat">
-          <div class="label">Residual Usuario 2</div>
+          <div class="label">Residual Joel</div>
           <div class="value ${residual2 >= 0 ? 'positive' : 'negative'}">
             ${residual2.toFixed(2)} €
           </div>
         </div>
       `;
-    }
-
-    function actualizarTodo() {
-      renderGastos();
-      actualizarResumen();
     }
 
     function escapeHtml(text) {
@@ -426,8 +515,16 @@
       return div.innerHTML;
     }
 
-    // Inicializar
-    actualizarTodo();
+    // ========== INICIO ==========
+    actualizarMes();
+
+    // Revisa cada minuto por si cambia el mes mientras la página está abierta
+    setInterval(() => {
+      const mes = getMesAnterior();
+      if (mes.key !== mesActualKey) {
+        actualizarMes();
+      }
+    }, 60 * 1000);
   </script>
 </body>
 </html>
