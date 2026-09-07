@@ -1,0 +1,33 @@
+name: Actualizar valores de mercado
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'   # Cada lunes a las 03:00 UTC
+  workflow_dispatch:       # Permite ejecutarlo manualmente
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scripts/requirements.txt
+
+      - name: Ejecutar script de actualización
+        run: python scripts/update_market_values.py
+
+      - name: Subir el nuevo CSV al repositorio
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Actualización automática de valores de mercado"
+          file_pattern: datos_con_valor.csv
