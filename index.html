@@ -105,16 +105,46 @@ let numericalMetrics = [];
 window.onload = function() {
     Papa.parse("./datos.csv", {
         download: true,
-        header: true,
+        header: false,          // Importante: no usamos header automático
         dynamicTyping: true,
         skipEmptyLines: true,
         complete: function(results) {
-            playersData = results.data;
+            const raw = results.data;
+
+            // Buscamos la fila que contiene "Player" (la cabecera real)
+            let headerRowIndex = -1;
+            for (let i = 0; i < Math.min(10, raw.length); i++) {
+                if (raw[i] && raw[i].some(cell => String(cell).trim() === "Player")) {
+                    headerRowIndex = i;
+                    break;
+                }
+            }
+
+            if (headerRowIndex === -1) {
+                document.getElementById("status").innerText = "No se encontró la cabecera 'Player' en el CSV";
+                console.error("No se encontró fila de cabecera");
+                return;
+            }
+
+            const headers = raw[headerRowIndex].map(h => String(h).trim());
+            const dataRows = raw.slice(headerRowIndex + 1);
+
+            // Convertimos a objetos
+            playersData = dataRows.map(row => {
+                const obj = {};
+                headers.forEach((header, idx) => {
+                    if (header) obj[header] = row[idx];
+                });
+                return obj;
+            }).filter(p => p.Player && p.Player !== "Player"); // quitamos posibles filas basura
+
             if (playersData.length > 0) {
                 identifyMetrics(playersData[0]);
                 document.getElementById("status").innerText = "Base de datos cargada correctamente (" + playersData.length + " jugadores).";
+                console.log("Columnas detectadas:", Object.keys(playersData[0]));
+                console.log("Ejemplo de jugador:", playersData[0]);
             } else {
-                document.getElementById("status").innerText = "Error: datos.csv esta vacio.";
+                document.getElementById("status").innerText = "Error: no se cargaron jugadores.";
             }
         },
         error: function(err) {
@@ -125,10 +155,11 @@ window.onload = function() {
 };
 
 function identifyMetrics(sampleRow) {
-    const nonMetricCols = ["Player","Squad","Pos","Age","MP","90s","Rk","Matches","Nation"];
+    const nonMetricCols = ["Player", "Nation", "Pos", "Squad", "Age", "Born", "MP", "Starts", "Min", "90s", "Rk", "Matches"];
     numericalMetrics = Object.keys(sampleRow).filter(function(key) {
         return nonMetricCols.indexOf(key) === -1 && typeof sampleRow[key] === "number";
     });
+    console.log("Métricas numéricas usadas:", numericalMetrics);
 }
 
 function getNormalizedStats(players) {
@@ -154,11 +185,11 @@ function calculateSimilarity() {
     });
 
     if (!target) {
-        document.getElementById("status").innerText = "No se encontro ningun jugador con \"" + query + "\"";
+        document.getElementById("status").innerText = "No se encontró ningún jugador con \"" + query + "\"";
         return;
     }
 
-    document.getElementById("status").innerText = "Similares a: " + target.Player + " (" + target.Squad + ")";
+    document.getElementById("status").innerText = "Similares a: " + target.Player + " (" + (target.Squad || "") + ")";
 
     var posFilter = document.getElementById("posFilter").value;
     var maxAge = parseFloat(document.getElementById("maxAge").value);
@@ -167,8 +198,8 @@ function calculateSimilarity() {
 
     var scores = playersData.map(function(player) {
         if (player.Player === target.Player) return null;
-        if (player["90s"] < min90s) return null;
-        if (player.Age > maxAge) return null;
+        if ((player["90s"] || 0) < min90s) return null;
+        if ((player.Age || 99) > maxAge) return null;
         if (posFilter !== "ALL" && player.Pos && player.Pos.indexOf(posFilter) === -1) return null;
 
         var sum = 0;
@@ -193,7 +224,7 @@ function calculateSimilarity() {
         return { player: player, similarity: similarity.toFixed(1) };
     }).filter(function(item) { return item !== null; });
 
-    scores.sort(function(a, b) { return b.similarity - a.similarity; });
+    scores.sort(function(a, b) { return parseFloat(b.similarity) - parseFloat(a.similarity); });
     renderResults(scores.slice(0, 15));
 }
 
@@ -215,7 +246,7 @@ function renderResults(results) {
             "<td>" + (p.Squad || "N/A") + "</td>" +
             "<td><span class=\"tag-pos\">" + (p.Pos || "N/A") + "</span></td>" +
             "<td>" + (p.Age || "N/A") + "</td>" +
-            "<td>" + (p["90s"] ? p["90s"].toFixed(1) : "N/A") + "</td>" +
+            "<td>" + (p["90s"] ? Number(p["90s"]).toFixed(1) : "N/A") + "</td>" +
             "<td><span class=\"badge\">" + item.similarity + "%</span></td>";
         tbody.appendChild(row);
     });
