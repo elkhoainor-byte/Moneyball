@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Player Similarity Engine - Moneyball Scouting</title>
-    <!-- PapaParse para procesar CSV en el navegador -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         :root {
@@ -17,14 +16,12 @@
             --border-color: #334155;
             --success: #22c55e;
         }
-
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
-
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
@@ -32,30 +29,25 @@
             display: flex;
             justify-content: center;
         }
-
         .container {
             width: 100%;
             max-width: 1000px;
         }
-
         header {
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
         }
-
         h1 {
             font-size: 2rem;
             color: var(--accent-color);
             margin-bottom: 8px;
         }
-
         p.subtitle {
             color: var(--text-muted);
             font-size: 0.95rem;
         }
-
         .search-card {
             background-color: var(--card-bg);
             padding: 20px;
@@ -63,13 +55,11 @@
             border: 1px solid var(--border-color);
             margin-bottom: 25px;
         }
-
         .search-group {
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
         }
-
         input[type="text"] {
             flex: 1;
             padding: 12px 16px;
@@ -79,12 +69,10 @@
             color: var(--text-main);
             font-size: 1rem;
         }
-
         input[type="text"]:focus {
             outline: none;
             border-color: var(--accent-color);
         }
-
         button {
             padding: 12px 24px;
             border-radius: 8px;
@@ -96,29 +84,24 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-
         button:hover {
             background-color: var(--accent-hover);
             color: #ffffff;
         }
-
         .filters {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
         }
-
         .filter-item {
             display: flex;
             flex-direction: column;
             gap: 5px;
         }
-
         .filter-item label {
             font-size: 0.85rem;
             color: var(--text-muted);
         }
-
         select {
             padding: 8px 12px;
             border-radius: 6px;
@@ -127,32 +110,27 @@
             color: var(--text-main);
             font-size: 0.9rem;
         }
-
         .status {
             margin-bottom: 15px;
             font-size: 0.9rem;
             color: var(--accent-color);
         }
-
         .table-container {
             overflow-x: auto;
             background-color: var(--card-bg);
             border-radius: 12px;
             border: 1px solid var(--border-color);
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
             font-size: 0.95rem;
         }
-
         th, td {
             padding: 14px 16px;
             border-bottom: 1px solid var(--border-color);
         }
-
         th {
             background-color: #0f172a;
             color: var(--text-muted);
@@ -161,15 +139,12 @@
             font-size: 0.8rem;
             letter-spacing: 0.5px;
         }
-
         tr:last-child td {
             border-bottom: none;
         }
-
         tr:hover td {
             background-color: rgba(56, 189, 248, 0.05);
         }
-
         .badge {
             display: inline-block;
             padding: 4px 8px;
@@ -179,7 +154,6 @@
             background-color: rgba(34, 197, 94, 0.15);
             color: var(--success);
         }
-
         .tag-pos {
             background-color: rgba(148, 163, 184, 0.15);
             color: var(--text-muted);
@@ -190,19 +164,16 @@
     </style>
 </head>
 <body>
-
 <div class="container">
     <header>
         <h1>Player Similarity Engine</h1>
         <p class="subtitle">Scouting cuantitativo & perfilado estadístico de sustitución (Moneyball)</p>
     </header>
-
     <div class="search-card">
         <div class="search-group">
             <input type="text" id="targetPlayer" placeholder="Introduce el nombre del jugador objetivo (ej: Lucas Torró, Budimir, Koke)...">
             <button onclick="calculateSimilarity()">Buscar Similares</button>
         </div>
-
         <div class="filters">
             <div class="filter-item">
                 <label for="posFilter">Posición</label>
@@ -217,24 +188,22 @@
                 <label for="maxAge">Edad Máxima</label>
                 <select id="maxAge" onchange="calculateSimilarity()">
                     <option value="100">Sin límite</option>
-                    <option value="23">Sub-23 (&le; 23)</option>
-                    <option value="25">Sub-25 (&le; 25)</option>
-                    <option value="28">Sub-28 (&le; 28)</option>
+                    <option value="23">Sub-23 (≤ 23)</option>
+                    <option value="25">Sub-25 (≤ 25)</option>
+                    <option value="28">Sub-28 (≤ 28)</option>
                 </select>
             </div>
             <div class="filter-item">
                 <label for="minMinutes">Minutos Jugados (90s)</label>
                 <select id="minMinutes" onchange="calculateSimilarity()">
-                    <option value="5">Mínimo 5 partidos (&ge; 450 min)</option>
-                    <option value="10" selected>Mínimo 10 partidos (&ge; 900 min)</option>
-                    <option value="15">Mínimo 15 partidos (&ge; 1350 min)</option>
+                    <option value="5">Mínimo 5 partidos (≥ 450 min)</option>
+                    <option value="10" selected>Mínimo 10 partidos (≥ 900 min)</option>
+                    <option value="15">Mínimo 15 partidos (≥ 1350 min)</option>
                 </select>
             </div>
         </div>
     </div>
-
     <div id="status" class="status">Cargando base de datos desde datos.csv...</div>
-
     <div class="table-container">
         <table>
             <thead>
@@ -258,14 +227,12 @@
         </table>
     </div>
 </div>
-
 <script>
     let playersData = [];
     let numericalMetrics = [];
 
-    // Cargar y procesar el CSV automáticamente al iniciar
     window.onload = function() {
-        Papa.parse("datos.csv", {
+        Papa.parse("./datos.csv", {
             download: true,
             header: true,
             dynamicTyping: true,
@@ -274,18 +241,18 @@
                 playersData = results.data;
                 if (playersData.length > 0) {
                     identifyMetrics(playersData[0]);
-                    document.getElementById("status").innerText = `Base de datos cargada correctamente (${playersData.length} jugadores registrados).`;
+                    document.getElementById("status").innerText = "Base de datos cargada correctamente (" + playersData.length + " jugadores registrados).";
                 } else {
                     document.getElementById("status").innerText = "Error: El archivo datos.csv está vacío.";
                 }
             },
             error: function(err) {
                 document.getElementById("status").innerText = "Error al cargar datos.csv. Asegúrate de que el archivo existe en el repositorio.";
+                console.error(err);
             }
         });
     };
 
-    // Identificar automáticamente qué columnas son numéricas para la comparación de distancia
     function identifyMetrics(sampleRow) {
         const nonMetricCols = ['Player', 'Squad', 'Pos', 'Age', 'MP', '90s', 'Rk', 'Matches', 'Nation'];
         numericalMetrics = Object.keys(sampleRow).filter(key => {
@@ -293,7 +260,6 @@
         });
     }
 
-    // Normalización Z-score / Min-Max para comparar métricas en la misma escala
     function getNormalizedStats(players) {
         let stats = {};
         numericalMetrics.forEach(metric => {
@@ -312,28 +278,22 @@
             return;
         }
 
-        // Buscar al jugador objetivo en la base de datos
         const target = playersData.find(p => p.Player && p.Player.toLowerCase().includes(query));
-
         if (!target) {
-            document.getElementById("status").innerText = `No se encontró ningún jugador que coincida con "${query}".`;
+            document.getElementById("status").innerText = 'No se encontró ningún jugador que coincida con "' + query + '".';
             return;
         }
 
-        document.getElementById("status").innerText = `Mostrando sustitutos similares para: ${target.Player} (${target.Squad})`;
+        document.getElementById("status").innerText = "Mostrando sustitutos similares para: " + target.Player + " (" + target.Squad + ")";
 
-        // Filtros
         const posFilter = document.getElementById("posFilter").value;
         const maxAge = parseFloat(document.getElementById("maxAge").value);
         const min90s = parseFloat(document.getElementById("minMinutes").value);
 
-        // Obtener rango de normalización
         const normBounds = getNormalizedStats(playersData);
 
-        // Algoritmo de distancia euclidiana estandarizada
         let scores = playersData.map(player => {
-            // Aplicar filtros
-            if (player.Player === target.Player) return null; // Excluir al propio objetivo
+            if (player.Player === target.Player) return null;
             if (player['90s'] < min90s) return null;
             if (player.Age > maxAge) return null;
             if (posFilter !== 'ALL' && player.Pos && !player.Pos.includes(posFilter)) return null;
@@ -344,14 +304,11 @@
             numericalMetrics.forEach(metric => {
                 const bounds = normBounds[metric];
                 const range = bounds.max - bounds.min;
-
                 if (range > 0) {
                     const targetVal = (target[metric] || 0) - bounds.min;
                     const playerVal = (player[metric] || 0) - bounds.min;
-
                     const normTarget = targetVal / range;
                     const normPlayer = playerVal / range;
-
                     sumSquaredDiffs += Math.pow(normTarget - normPlayer, 2);
                     validMetricsCount++;
                 }
@@ -360,7 +317,6 @@
             if (validMetricsCount === 0) return null;
 
             const distance = Math.sqrt(sumSquaredDiffs / validMetricsCount);
-            // Convertir distancia (0 a 1) en porcentaje de compatibilidad (100% similitud)
             const similarity = Math.max(0, 100 * (1 - distance));
 
             return {
@@ -369,10 +325,8 @@
             };
         }).filter(item => item !== null);
 
-        // Ordenar de mayor a menor compatibilidad
         scores.sort((a, b) => b.similarity - a.similarity);
-
-        renderResults(scores.slice(0, 15)); // Mostrar Top 15
+        renderResults(scores.slice(0, 15));
     }
 
     function renderResults(results) {
@@ -380,28 +334,24 @@
         tbody.innerHTML = "";
 
         if (results.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No se encontraron sustitutos que cumplan los filtros seleccionados.</td></tr>`;
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No se encontraron sustitutos que cumplan los filtros seleccionados.</td></tr>';
             return;
         }
 
         results.forEach((item, index) => {
             const p = item.player;
             const row = document.createElement("tr");
-
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td><strong>${p.Player}</strong></td>
-                <td>${p.Squad || 'N/A'}</td>
-                <td><span class="tag-pos">${p.Pos || 'N/A'}</span></td>
-                <td>${p.Age || 'N/A'}</td>
-                <td>${p.90s ? p.90s.toFixed(1) : 'N/A'}</td>
-                <td><span class="badge">${item.similarity}%</span></td>
-            `;
-
+            row.innerHTML = 
+                "<td>" + (index + 1) + "</td>" +
+                "<td><strong>" + p.Player + "</strong></td>" +
+                "<td>" + (p.Squad || "N/A") + "</td>" +
+                "<td><span class='tag-pos'>" + (p.Pos || "N/A") + "</span></td>" +
+                "<td>" + (p.Age || "N/A") + "</td>" +
+                "<td>" + (p.90s ? p.90s.toFixed(1) : "N/A") + "</td>" +
+                "<td><span class='badge'>" + item.similarity + "%</span></td>";
             tbody.appendChild(row);
         });
     }
 </script>
-
 </body>
 </html>
