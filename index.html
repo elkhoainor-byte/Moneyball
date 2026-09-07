@@ -105,46 +105,58 @@ let numericalMetrics = [];
 window.onload = function() {
     Papa.parse("./datos.csv", {
         download: true,
-        header: false,          // Importante: no usamos header automático
+        header: false,
         dynamicTyping: true,
         skipEmptyLines: true,
         complete: function(results) {
             const raw = results.data;
+            console.log("Primeras 5 filas del CSV:", raw.slice(0, 5));
 
-            // Buscamos la fila que contiene "Player" (la cabecera real)
+            // Buscamos la fila que contenga la palabra "Player" (más flexible)
             let headerRowIndex = -1;
-            for (let i = 0; i < Math.min(10, raw.length); i++) {
-                if (raw[i] && raw[i].some(cell => String(cell).trim() === "Player")) {
+            for (let i = 0; i < Math.min(15, raw.length); i++) {
+                const row = raw[i];
+                if (!row) continue;
+
+                const found = row.some(cell => {
+                    const text = String(cell || "").toLowerCase().trim();
+                    return text === "player" || text.includes("player");
+                });
+
+                if (found) {
                     headerRowIndex = i;
                     break;
                 }
             }
 
             if (headerRowIndex === -1) {
-                document.getElementById("status").innerText = "No se encontró la cabecera 'Player' en el CSV";
-                console.error("No se encontró fila de cabecera");
+                document.getElementById("status").innerText = "No se encontró la cabecera Player";
+                console.error("No se encontró fila con 'Player'. Revisa las primeras filas en la consola.");
                 return;
             }
 
-            const headers = raw[headerRowIndex].map(h => String(h).trim());
+            console.log("Cabecera encontrada en la fila:", headerRowIndex);
+
+            const headers = raw[headerRowIndex].map(h => String(h || "").trim().replace(/\n/g, " "));
             const dataRows = raw.slice(headerRowIndex + 1);
 
-            // Convertimos a objetos
             playersData = dataRows.map(row => {
                 const obj = {};
                 headers.forEach((header, idx) => {
-                    if (header) obj[header] = row[idx];
+                    if (header && header !== "") {
+                        obj[header] = row[idx];
+                    }
                 });
                 return obj;
-            }).filter(p => p.Player && p.Player !== "Player"); // quitamos posibles filas basura
+            }).filter(p => p.Player && String(p.Player).trim() !== "" && String(p.Player).toLowerCase() !== "player");
 
             if (playersData.length > 0) {
                 identifyMetrics(playersData[0]);
                 document.getElementById("status").innerText = "Base de datos cargada correctamente (" + playersData.length + " jugadores).";
                 console.log("Columnas detectadas:", Object.keys(playersData[0]));
-                console.log("Ejemplo de jugador:", playersData[0]);
+                console.log("Primer jugador:", playersData[0]);
             } else {
-                document.getElementById("status").innerText = "Error: no se cargaron jugadores.";
+                document.getElementById("status").innerText = "Error: no se cargaron jugadores válidos.";
             }
         },
         error: function(err) {
@@ -159,7 +171,7 @@ function identifyMetrics(sampleRow) {
     numericalMetrics = Object.keys(sampleRow).filter(function(key) {
         return nonMetricCols.indexOf(key) === -1 && typeof sampleRow[key] === "number";
     });
-    console.log("Métricas numéricas usadas:", numericalMetrics);
+    console.log("Métricas numéricas:", numericalMetrics);
 }
 
 function getNormalizedStats(players) {
