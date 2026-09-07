@@ -17,13 +17,13 @@ print(f"Jugadores de Transfermarkt cargados: {len(tm)}")
 
 print("Leyendo datos.csv de FBRef...")
 
-# Lectura más tolerante del CSV problemático
+# IMPORTANTE: el separador es punto y coma (;)
 raw = pd.read_csv(
     "datos.csv",
     header=None,
-    engine="python",          # más tolerante
-    on_bad_lines="skip",      # salta líneas mal formadas
-    sep=",",
+    sep=";",
+    engine="python",
+    on_bad_lines="skip",
     quotechar='"',
     skipinitialspace=True
 )
@@ -41,7 +41,7 @@ for i in range(min(20, len(raw))):
         break
 
 if header_row_index is None:
-    raise Exception("No se encontró la fila de cabecera con 'Player'. Revisa las primeras filas arriba.")
+    raise Exception("No se encontró la fila de cabecera con 'Player'")
 
 print(f"Cabecera encontrada en la fila: {header_row_index}")
 
@@ -50,19 +50,22 @@ headers = raw.iloc[header_row_index].astype(str).str.replace("\n", " ").str.stri
 fbref = raw.iloc[header_row_index + 1:].copy()
 fbref.columns = headers
 
-# Limpiamos
-fbref = fbref.loc[:, ~fbref.columns.duplicated()]  # quitar columnas duplicadas si las hay
-fbref = fbref.dropna(subset=["Player"], how="all")
+# Limpiamos nombres de columnas
+fbref.columns = [str(c).replace("\n", " ").strip() for c in fbref.columns]
+fbref = fbref.loc[:, ~fbref.columns.duplicated()]
+
+# Filtramos filas válidas
+fbref = fbref.dropna(subset=["Player"])
 fbref = fbref[fbref["Player"].astype(str).str.lower().str.strip() != "player"]
 
 print(f"Jugadores de FBRef cargados: {len(fbref)}")
 print("Algunas columnas:", list(fbref.columns)[:12])
 
-# Matching
+# Matching de nombres
 fbref["name_clean"] = fbref["Player"].astype(str).str.lower().str.strip()
 
 def find_best_match(name, choices, threshold=85):
-    if not isinstance(name, str) or name in ["", "nan", "none"]:
+    if not isinstance(name, str) or name.lower() in ["", "nan", "none"]:
         return None
     match = process.extractOne(name, choices, scorer=fuzz.token_sort_ratio)
     if match and match[1] >= threshold:
@@ -86,7 +89,7 @@ cols_to_drop = [c for c in merged.columns if "name_clean" in str(c) or c == "mat
 merged = merged.drop(columns=cols_to_drop, errors="ignore")
 merged = merged.rename(columns={"market_value_in_eur": "MarketValue"})
 
-merged.to_csv("datos_con_valor.csv", index=False)
+merged.to_csv("datos_con_valor.csv", index=False, sep=";")
 
 matched = merged["MarketValue"].notna().sum()
 print(f"¡Listo! Se han emparejado {matched} de {len(merged)} jugadores.")
