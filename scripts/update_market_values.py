@@ -17,22 +17,31 @@ print(f"Jugadores de Transfermarkt cargados: {len(tm)}")
 
 print("Leyendo datos.csv de FBRef...")
 
-# IMPORTANTE: el separador es punto y coma (;)
 raw = pd.read_csv(
     "datos.csv",
     header=None,
     sep=";",
     engine="python",
     on_bad_lines="skip",
-    quotechar='"',
-    skipinitialspace=True
+    encoding="utf-8",          # Intentamos UTF-8 primero
+    encoding_errors="replace"
 )
 
-print(f"Filas leídas: {len(raw)}")
-print("Primeras 5 filas:")
-print(raw.head())
+# Si falla, probamos latin1
+if raw.empty or len(raw.columns) < 5:
+    print("Probando con encoding latin1...")
+    raw = pd.read_csv(
+        "datos.csv",
+        header=None,
+        sep=";",
+        engine="python",
+        on_bad_lines="skip",
+        encoding="latin1"
+    )
 
-# Buscamos la fila que contiene "Player"
+print(f"Filas leídas: {len(raw)}")
+
+# Buscar cabecera
 header_row_index = None
 for i in range(min(20, len(raw))):
     row_as_str = raw.iloc[i].astype(str).str.lower().str.strip()
@@ -45,23 +54,18 @@ if header_row_index is None:
 
 print(f"Cabecera encontrada en la fila: {header_row_index}")
 
-# Usamos esa fila como nombres de columna
 headers = raw.iloc[header_row_index].astype(str).str.replace("\n", " ").str.strip().tolist()
 fbref = raw.iloc[header_row_index + 1:].copy()
 fbref.columns = headers
-
-# Limpiamos nombres de columnas
 fbref.columns = [str(c).replace("\n", " ").strip() for c in fbref.columns]
 fbref = fbref.loc[:, ~fbref.columns.duplicated()]
 
-# Filtramos filas válidas
 fbref = fbref.dropna(subset=["Player"])
 fbref = fbref[fbref["Player"].astype(str).str.lower().str.strip() != "player"]
 
 print(f"Jugadores de FBRef cargados: {len(fbref)}")
-print("Algunas columnas:", list(fbref.columns)[:12])
 
-# Matching de nombres
+# Matching
 fbref["name_clean"] = fbref["Player"].astype(str).str.lower().str.strip()
 
 def find_best_match(name, choices, threshold=85):
@@ -84,13 +88,13 @@ merged = fbref.merge(
     how="left"
 )
 
-# Limpiar columnas temporales
 cols_to_drop = [c for c in merged.columns if "name_clean" in str(c) or c == "matched_name"]
 merged = merged.drop(columns=cols_to_drop, errors="ignore")
 merged = merged.rename(columns={"market_value_in_eur": "MarketValue"})
 
-merged.to_csv("datos_con_valor.csv", index=False, sep=";")
+# ===== GUARDAR FORZANDO UTF-8 =====
+merged.to_csv("datos_con_valor.csv", index=False, sep=";", encoding="utf-8-sig")
 
 matched = merged["MarketValue"].notna().sum()
 print(f"¡Listo! Se han emparejado {matched} de {len(merged)} jugadores.")
-print("Archivo generado: datos_con_valor.csv")
+print("Archivo generado: datos_con_valor.csv (UTF-8)")
