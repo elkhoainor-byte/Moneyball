@@ -124,10 +124,11 @@ window.onload = function() {
         dynamicTyping: true,
         skipEmptyLines: true,
         delimiter: ";",
+        encoding: "UTF-8",
         complete: function(results) {
             const raw = results.data;
-            console.log("Primeras filas:", raw.slice(0, 5));
 
+            // Buscar la fila de cabecera
             let headerRowIndex = -1;
             for (let i = 0; i < Math.min(20, raw.length); i++) {
                 const row = raw[i];
@@ -147,35 +148,43 @@ window.onload = function() {
                 return;
             }
 
-            const headers = raw[headerRowIndex].map(function(h) {
-                return String(h || "").replace(/\n/g, " ").trim();
-            });
-
+            const headers = raw[headerRowIndex].map(h => String(h || "").replace(/\n/g, " ").trim());
             const dataRows = raw.slice(headerRowIndex + 1);
 
-            playersData = dataRows.map(function(row) {
+            // Convertir a objetos
+            let tempData = dataRows.map(row => {
                 const obj = {};
-                headers.forEach(function(header, idx) {
+                headers.forEach((header, idx) => {
                     if (header) obj[header] = row[idx];
                 });
                 return obj;
-            }).filter(function(p) {
-                return p.Player && String(p.Player).trim() !== "" && String(p.Player).toLowerCase() !== "player";
+            }).filter(p => p.Player && String(p.Player).trim() !== "" && String(p.Player).toLowerCase() !== "player");
+
+            // ===== ELIMINAR DUPLICADOS =====
+            // Nos quedamos con el jugador que más minutos tenga
+            const uniqueMap = {};
+            tempData.forEach(p => {
+                const key = p.Player.trim().toLowerCase();
+                const minutes = Number(p["90s"]) || 0;
+
+                if (!uniqueMap[key] || minutes > (Number(uniqueMap[key]["90s"]) || 0)) {
+                    uniqueMap[key] = p;
+                }
             });
 
+            playersData = Object.values(uniqueMap);
+
             // Convertir MarketValue a número
-            playersData.forEach(function(p) {
-                if (p.MarketValue) {
-                    p.MarketValue = Number(p.MarketValue);
-                }
+            playersData.forEach(p => {
+                if (p.MarketValue) p.MarketValue = Number(p.MarketValue);
             });
 
             if (playersData.length > 0) {
                 identifyMetrics(playersData[0]);
-                document.getElementById("status").innerText = "Base de datos cargada (" + playersData.length + " jugadores)";
-                console.log("Primer jugador:", playersData[0]);
+                document.getElementById("status").innerText = "Base de datos cargada (" + playersData.length + " jugadores únicos)";
+                console.log("Ejemplo de jugador:", playersData[0]);
             } else {
-                document.getElementById("status").innerText = "Error: 0 jugadores validos";
+                document.getElementById("status").innerText = "Error: 0 jugadores válidos";
             }
         },
         error: function(err) {
@@ -187,18 +196,18 @@ window.onload = function() {
 
 function identifyMetrics(sampleRow) {
     const nonMetricCols = ["Player","Nation","Pos","Squad","Age","Born","MP","Starts","Min","90s","Rk","Matches","MarketValue"];
-    numericalMetrics = Object.keys(sampleRow).filter(function(key) {
+    numericalMetrics = Object.keys(sampleRow).filter(key => {
         return nonMetricCols.indexOf(key) === -1 && typeof sampleRow[key] === "number";
     });
 }
 
 function getNormalizedStats(players) {
-    var stats = {};
-    numericalMetrics.forEach(function(metric) {
-        var values = players.map(function(p) { return p[metric] || 0; });
-        var min = Math.min.apply(null, values);
-        var max = Math.max.apply(null, values);
-        stats[metric] = { min: min, max: max };
+    const stats = {};
+    numericalMetrics.forEach(metric => {
+        const values = players.map(p => p[metric] || 0);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        stats[metric] = { min, max };
     });
     return stats;
 }
@@ -206,58 +215,54 @@ function getNormalizedStats(players) {
 function formatValue(val) {
     if (!val || isNaN(val)) return "N/A";
     if (val >= 1000000) return (val / 1000000).toFixed(1) + " M€";
-    if (val >= 1000) return (val / 1000).toFixed(0) + " K€";
+    if (val >= 1000) return Math.round(val / 1000) + " K€";
     return val + " €";
 }
 
 function calculateSimilarity() {
-    var query = document.getElementById("targetPlayer").value.trim().toLowerCase();
+    const query = document.getElementById("targetPlayer").value.trim().toLowerCase();
     if (!query) {
         alert("Introduce el nombre de un jugador");
         return;
     }
 
-    var target = playersData.find(function(p) {
-        return p.Player && p.Player.toLowerCase().indexOf(query) !== -1;
-    });
-
+    const target = playersData.find(p => p.Player && p.Player.toLowerCase().includes(query));
     if (!target) {
-        document.getElementById("status").innerText = "No se encontro ningun jugador con \"" + query + "\"";
+        document.getElementById("status").innerText = `No se encontró ningún jugador con "${query}"`;
         return;
     }
 
-    document.getElementById("status").innerText = "Similares a: " + target.Player + " (" + (target.Squad || "") + ")";
+    document.getElementById("status").innerText = `Similares a: ${target.Player} (${target.Squad || ""})`;
 
-    var posFilter = document.getElementById("posFilter").value;
-    var maxAge = parseFloat(document.getElementById("maxAge").value);
-    var min90s = parseFloat(document.getElementById("minMinutes").value);
+    const posFilter = document.getElementById("posFilter").value;
+    const maxAge = parseFloat(document.getElementById("maxAge").value);
+    const min90s = parseFloat(document.getElementById("minMinutes").value);
 
-    var minValue = document.getElementById("minValue").value;
-    var maxValue = document.getElementById("maxValue").value;
+    let minValue = document.getElementById("minValue").value;
+    let maxValue = document.getElementById("maxValue").value;
     minValue = minValue ? parseFloat(minValue) : 0;
     maxValue = maxValue ? parseFloat(maxValue) : Infinity;
 
-    var normBounds = getNormalizedStats(playersData);
+    const normBounds = getNormalizedStats(playersData);
 
-    var scores = playersData.map(function(player) {
+    let scores = playersData.map(player => {
         if (player.Player === target.Player) return null;
         if ((player["90s"] || 0) < min90s) return null;
         if ((player.Age || 99) > maxAge) return null;
-        if (posFilter !== "ALL" && player.Pos && player.Pos.indexOf(posFilter) === -1) return null;
+        if (posFilter !== "ALL" && player.Pos && !player.Pos.includes(posFilter)) return null;
 
-        // Filtro de valor de mercado
-        var mv = player.MarketValue || 0;
+        const mv = player.MarketValue || 0;
         if (mv < minValue || mv > maxValue) return null;
 
-        var sum = 0;
-        var count = 0;
+        let sum = 0;
+        let count = 0;
 
-        numericalMetrics.forEach(function(metric) {
-            var bounds = normBounds[metric];
-            var range = bounds.max - bounds.min;
+        numericalMetrics.forEach(metric => {
+            const bounds = normBounds[metric];
+            const range = bounds.max - bounds.min;
             if (range > 0) {
-                var t = ((target[metric] || 0) - bounds.min) / range;
-                var p = ((player[metric] || 0) - bounds.min) / range;
+                const t = ((target[metric] || 0) - bounds.min) / range;
+                const p = ((player[metric] || 0) - bounds.min) / range;
                 sum += Math.pow(t - p, 2);
                 count++;
             }
@@ -265,37 +270,38 @@ function calculateSimilarity() {
 
         if (count === 0) return null;
 
-        var distance = Math.sqrt(sum / count);
-        var similarity = Math.max(0, 100 * (1 - distance));
+        const distance = Math.sqrt(sum / count);
+        const similarity = Math.max(0, 100 * (1 - distance));
 
-        return { player: player, similarity: similarity.toFixed(1) };
-    }).filter(function(item) { return item !== null; });
+        return { player, similarity: similarity.toFixed(1) };
+    }).filter(item => item !== null);
 
-    scores.sort(function(a, b) { return parseFloat(b.similarity) - parseFloat(a.similarity); });
+    scores.sort((a, b) => parseFloat(b.similarity) - parseFloat(a.similarity));
     renderResults(scores.slice(0, 15));
 }
 
 function renderResults(results) {
-    var tbody = document.getElementById("resultsBody");
+    const tbody = document.getElementById("resultsBody");
     tbody.innerHTML = "";
 
     if (results.length === 0) {
-        tbody.innerHTML = "<tr><td colspan=\"8\" style=\"text-align:center;color:var(--muted)\">No hay resultados con esos filtros</td></tr>";
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted)">No hay resultados con esos filtros</td></tr>`;
         return;
     }
 
-    results.forEach(function(item, index) {
-        var p = item.player;
-        var row = document.createElement("tr");
-        row.innerHTML =
-            "<td>" + (index + 1) + "</td>" +
-            "<td><strong>" + p.Player + "</strong></td>" +
-            "<td>" + (p.Squad || "N/A") + "</td>" +
-            "<td><span class=\"tag-pos\">" + (p.Pos || "N/A") + "</span></td>" +
-            "<td>" + (p.Age || "N/A") + "</td>" +
-            "<td>" + (p["90s"] ? Number(p["90s"]).toFixed(1) : "N/A") + "</td>" +
-            "<td class=\"market\">" + formatValue(p.MarketValue) + "</td>" +
-            "<td><span class=\"badge\">" + item.similarity + "%</span></td>";
+    results.forEach((item, index) => {
+        const p = item.player;
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td><strong>${p.Player}</strong></td>
+            <td>${p.Squad || "N/A"}</td>
+            <td><span class="tag-pos">${p.Pos || "N/A"}</span></td>
+            <td>${p.Age || "N/A"}</td>
+            <td>${p["90s"] ? Number(p["90s"]).toFixed(1) : "N/A"}</td>
+            <td class="market">${formatValue(p.MarketValue)}</td>
+            <td><span class="badge">${item.similarity}%</span></td>
+        `;
         tbody.appendChild(row);
     });
 }
