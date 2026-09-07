@@ -9,20 +9,20 @@
 :root{--bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--accent2:#0284c7;--text:#f8fafc;--muted:#94a3b8;--border:#334155;--ok:#22c55e}
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 body{background:var(--bg);color:var(--text);padding:20px;display:flex;justify-content:center}
-.container{width:100%;max-width:1000px}
+.container{width:100%;max-width:1100px}
 header{text-align:center;margin-bottom:30px;padding-bottom:20px;border-bottom:1px solid var(--border)}
 h1{font-size:2rem;color:var(--accent);margin-bottom:8px}
 .subtitle{color:var(--muted);font-size:0.95rem}
 .search-card{background:var(--card);padding:20px;border-radius:12px;border:1px solid var(--border);margin-bottom:25px}
 .search-group{display:flex;gap:10px;margin-bottom:15px}
-input[type=text]{flex:1;padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:#0f172a;color:var(--text);font-size:1rem}
-input[type=text]:focus{outline:none;border-color:var(--accent)}
+input[type=text], input[type=number]{flex:1;padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:#0f172a;color:var(--text);font-size:1rem}
+input:focus{outline:none;border-color:var(--accent)}
 button{padding:12px 24px;border-radius:8px;border:none;background:var(--accent);color:#0f172a;font-weight:bold;font-size:1rem;cursor:pointer}
 button:hover{background:var(--accent2);color:#fff}
-.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px}
 .filter-item{display:flex;flex-direction:column;gap:5px}
 .filter-item label{font-size:0.85rem;color:var(--muted)}
-select{padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:#0f172a;color:var(--text);font-size:0.9rem}
+select, input[type=number]{padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:#0f172a;color:var(--text);font-size:0.9rem}
 .status{margin-bottom:15px;font-size:0.9rem;color:var(--accent)}
 .table-container{overflow-x:auto;background:var(--card);border-radius:12px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;text-align:left;font-size:0.95rem}
@@ -32,6 +32,7 @@ tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(56,189,248,0.05)}
 .badge{display:inline-block;padding:4px 8px;border-radius:4px;font-weight:bold;font-size:0.85rem;background:rgba(34,197,94,0.15);color:var(--ok)}
 .tag-pos{background:rgba(148,163,184,0.15);color:var(--muted);padding:2px 6px;border-radius:4px;font-size:0.8rem}
+.market{font-weight:600;color:#fbbf24}
 </style>
 </head>
 <body>
@@ -46,16 +47,18 @@ tr:hover td{background:rgba(56,189,248,0.05)}
 <input type="text" id="targetPlayer" placeholder="Introduce el nombre del jugador (ej: Lucas Torro, Budimir, Koke)">
 <button onclick="calculateSimilarity()">Buscar Similares</button>
 </div>
+
 <div class="filters">
 <div class="filter-item">
 <label for="posFilter">Posicion</label>
 <select id="posFilter" onchange="calculateSimilarity()">
-<option value="ALL">Todas las posiciones</option>
+<option value="ALL">Todas</option>
 <option value="MF">Centrocampistas (MF)</option>
 <option value="FW">Delanteros (FW)</option>
 <option value="DF">Defensas (DF)</option>
 </select>
 </div>
+
 <div class="filter-item">
 <label for="maxAge">Edad Maxima</label>
 <select id="maxAge" onchange="calculateSimilarity()">
@@ -65,13 +68,24 @@ tr:hover td{background:rgba(56,189,248,0.05)}
 <option value="28">Sub-28</option>
 </select>
 </div>
+
 <div class="filter-item">
-<label for="minMinutes">Minutos Jugados (90s)</label>
+<label for="minMinutes">Minutos (90s)</label>
 <select id="minMinutes" onchange="calculateSimilarity()">
-<option value="5">Minimo 5 partidos</option>
-<option value="10" selected>Minimo 10 partidos</option>
-<option value="15">Minimo 15 partidos</option>
+<option value="5">Min. 5 partidos</option>
+<option value="10" selected>Min. 10 partidos</option>
+<option value="15">Min. 15 partidos</option>
 </select>
+</div>
+
+<div class="filter-item">
+<label for="minValue">Valor Min (€)</label>
+<input type="number" id="minValue" placeholder="0" min="0" step="100000" onchange="calculateSimilarity()">
+</div>
+
+<div class="filter-item">
+<label for="maxValue">Valor Max (€)</label>
+<input type="number" id="maxValue" placeholder="Sin limite" min="0" step="100000" onchange="calculateSimilarity()">
 </div>
 </div>
 </div>
@@ -88,11 +102,12 @@ tr:hover td{background:rgba(56,189,248,0.05)}
 <th>Pos</th>
 <th>Edad</th>
 <th>90s</th>
+<th>Valor Mercado</th>
 <th>Compatibilidad</th>
 </tr>
 </thead>
 <tbody id="resultsBody">
-<tr><td colspan="7" style="text-align:center;color:var(--muted)">Introduce un jugador para ver recomendaciones</td></tr>
+<tr><td colspan="8" style="text-align:center;color:var(--muted)">Introduce un jugador para ver recomendaciones</td></tr>
 </tbody>
 </table>
 </div>
@@ -103,22 +118,20 @@ let playersData = [];
 let numericalMetrics = [];
 
 window.onload = function() {
-    Papa.parse("./datos.csv", {
+    Papa.parse("./datos_con_valor.csv", {
         download: true,
         header: false,
         dynamicTyping: true,
         skipEmptyLines: true,
+        delimiter: ";",
         complete: function(results) {
             const raw = results.data;
-            console.log("=== PRIMERAS 8 FILAS DEL CSV ===");
-            console.log(raw.slice(0, 8));
+            console.log("Primeras filas:", raw.slice(0, 5));
 
-            // Busqueda flexible de la fila de cabecera
             let headerRowIndex = -1;
             for (let i = 0; i < Math.min(20, raw.length); i++) {
                 const row = raw[i];
                 if (!row) continue;
-
                 for (let j = 0; j < row.length; j++) {
                     const text = String(row[j] || "").toLowerCase().replace(/\n/g, " ").trim();
                     if (text === "player" || text.indexOf("player") === 0) {
@@ -130,17 +143,13 @@ window.onload = function() {
             }
 
             if (headerRowIndex === -1) {
-                document.getElementById("status").innerText = "ERROR: No se encontro la columna Player. Mira la consola (F12).";
+                document.getElementById("status").innerText = "ERROR: No se encontro la columna Player";
                 return;
             }
-
-            console.log("Cabecera encontrada en fila numero:", headerRowIndex);
 
             const headers = raw[headerRowIndex].map(function(h) {
                 return String(h || "").replace(/\n/g, " ").trim();
             });
-
-            console.log("Headers detectados:", headers);
 
             const dataRows = raw.slice(headerRowIndex + 1);
 
@@ -154,10 +163,17 @@ window.onload = function() {
                 return p.Player && String(p.Player).trim() !== "" && String(p.Player).toLowerCase() !== "player";
             });
 
+            // Convertir MarketValue a número
+            playersData.forEach(function(p) {
+                if (p.MarketValue) {
+                    p.MarketValue = Number(p.MarketValue);
+                }
+            });
+
             if (playersData.length > 0) {
                 identifyMetrics(playersData[0]);
                 document.getElementById("status").innerText = "Base de datos cargada (" + playersData.length + " jugadores)";
-                console.log("Primer jugador cargado:", playersData[0]);
+                console.log("Primer jugador:", playersData[0]);
             } else {
                 document.getElementById("status").innerText = "Error: 0 jugadores validos";
             }
@@ -170,11 +186,10 @@ window.onload = function() {
 };
 
 function identifyMetrics(sampleRow) {
-    const nonMetricCols = ["Player","Nation","Pos","Squad","Age","Born","MP","Starts","Min","90s","Rk","Matches"];
+    const nonMetricCols = ["Player","Nation","Pos","Squad","Age","Born","MP","Starts","Min","90s","Rk","Matches","MarketValue"];
     numericalMetrics = Object.keys(sampleRow).filter(function(key) {
         return nonMetricCols.indexOf(key) === -1 && typeof sampleRow[key] === "number";
     });
-    console.log("Metricas numericas:", numericalMetrics);
 }
 
 function getNormalizedStats(players) {
@@ -186,6 +201,13 @@ function getNormalizedStats(players) {
         stats[metric] = { min: min, max: max };
     });
     return stats;
+}
+
+function formatValue(val) {
+    if (!val || isNaN(val)) return "N/A";
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + " M€";
+    if (val >= 1000) return (val / 1000).toFixed(0) + " K€";
+    return val + " €";
 }
 
 function calculateSimilarity() {
@@ -209,6 +231,12 @@ function calculateSimilarity() {
     var posFilter = document.getElementById("posFilter").value;
     var maxAge = parseFloat(document.getElementById("maxAge").value);
     var min90s = parseFloat(document.getElementById("minMinutes").value);
+
+    var minValue = document.getElementById("minValue").value;
+    var maxValue = document.getElementById("maxValue").value;
+    minValue = minValue ? parseFloat(minValue) : 0;
+    maxValue = maxValue ? parseFloat(maxValue) : Infinity;
+
     var normBounds = getNormalizedStats(playersData);
 
     var scores = playersData.map(function(player) {
@@ -216,6 +244,10 @@ function calculateSimilarity() {
         if ((player["90s"] || 0) < min90s) return null;
         if ((player.Age || 99) > maxAge) return null;
         if (posFilter !== "ALL" && player.Pos && player.Pos.indexOf(posFilter) === -1) return null;
+
+        // Filtro de valor de mercado
+        var mv = player.MarketValue || 0;
+        if (mv < minValue || mv > maxValue) return null;
 
         var sum = 0;
         var count = 0;
@@ -248,7 +280,7 @@ function renderResults(results) {
     tbody.innerHTML = "";
 
     if (results.length === 0) {
-        tbody.innerHTML = "<tr><td colspan=\"7\" style=\"text-align:center;color:var(--muted)\">No hay resultados con esos filtros</td></tr>";
+        tbody.innerHTML = "<tr><td colspan=\"8\" style=\"text-align:center;color:var(--muted)\">No hay resultados con esos filtros</td></tr>";
         return;
     }
 
@@ -262,6 +294,7 @@ function renderResults(results) {
             "<td><span class=\"tag-pos\">" + (p.Pos || "N/A") + "</span></td>" +
             "<td>" + (p.Age || "N/A") + "</td>" +
             "<td>" + (p["90s"] ? Number(p["90s"]).toFixed(1) : "N/A") + "</td>" +
+            "<td class=\"market\">" + formatValue(p.MarketValue) + "</td>" +
             "<td><span class=\"badge\">" + item.similarity + "%</span></td>";
         tbody.appendChild(row);
     });
