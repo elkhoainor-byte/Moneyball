@@ -3,106 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moneyball Scouting Engine</title>
+    <title>Player Similarity Engine - Moneyball Scouting</title>
+    <!-- PapaParse para procesar CSV en el navegador -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         :root {
             --bg-color: #0f172a;
             --card-bg: #1e293b;
-            --accent: #38bdf8;
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --border: #334155;
+            --border-color: #334155;
+            --success: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            font-family: system-ui, -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
-            margin: 0;
             padding: 20px;
             display: flex;
             justify-content: center;
         }
 
         .container {
-            max-width: 900px;
             width: 100%;
+            max-width: 1000px;
         }
 
         header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 1px solid var(--border);
             padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        h1 { color: var(--accent); margin-bottom: 5px; }
-        p { color: var(--text-muted); margin: 0; }
+        h1 {
+            font-size: 2rem;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+        }
 
-        .card {
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .search-card {
             background-color: var(--card-bg);
             padding: 20px;
             border-radius: 12px;
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
         }
 
-        .form-group {
+        .search-group {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 15px;
         }
 
-        label { font-weight: 600; font-size: 0.9rem; }
-
-        input, select, button {
-            padding: 12px;
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
             border-radius: 8px;
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-color);
             background-color: #0f172a;
             color: var(--text-main);
             font-size: 1rem;
         }
 
-        button {
-            background-color: var(--accent);
-            color: #0f172a;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            transition: opacity 0.2s;
-            margin-top: 10px;
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
         }
 
-        button:hover { opacity: 0.9; }
+        button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            background-color: var(--accent-color);
+            color: #0f172a;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
 
-        .grid-2 {
+        button:hover {
+            background-color: var(--accent-hover);
+            color: #ffffff;
+        }
+
+        .filters {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-item label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: #0f172a;
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+
+        .status {
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: var(--accent-color);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            text-align: left;
+            font-size: 0.95rem;
         }
 
         th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        th { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; }
+        th {
+            background-color: #0f172a;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(56, 189, 248, 0.05);
+        }
 
         .badge {
-            background-color: #0284c7;
+            display: inline-block;
             padding: 4px 8px;
             border-radius: 4px;
             font-weight: bold;
             font-size: 0.85rem;
+            background-color: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .tag-pos {
+            background-color: rgba(148, 163, 184, 0.15);
+            color: var(--text-muted);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
         }
     </style>
 </head>
@@ -110,116 +193,213 @@
 
 <div class="container">
     <header>
-        <h1>Moneyball Scouting Engine</h1>
-        <p>Motor de similitud para reemplazos tácticos multiclub</p>
+        <h1>Player Similarity Engine</h1>
+        <p class="subtitle">Scouting cuantitativo & perfilado estadístico de sustitución (Moneyball)</p>
     </header>
 
-    <!-- Cargar Datos -->
-    <div class="card">
-        <div class="form-group">
-            <label for="csvFile">1. Cargar archivo de datos (CSV exportado de FBref):</label>
-            <input type="file" id="csvFile" accept=".csv">
+    <div class="search-card">
+        <div class="search-group">
+            <input type="text" id="targetPlayer" placeholder="Introduce el nombre del jugador objetivo (ej: Lucas Torró, Budimir, Koke)...">
+            <button onclick="calculateSimilarity()">Buscar Similares</button>
         </div>
-    </div>
 
-    <!-- Parámetros de Búsqueda -->
-    <div class="card">
-        <div class="grid-2">
-            <div class="form-group">
-                <label for="targetPlayer">2. Jugador a sustituir:</label>
-                <input type="text" id="targetPlayer" placeholder="Ej: Lucas Torró, Koke, Budimir...">
+        <div class="filters">
+            <div class="filter-item">
+                <label for="posFilter">Posición</label>
+                <select id="posFilter" onchange="calculateSimilarity()">
+                    <option value="ALL">Todas las posiciones</option>
+                    <option value="MF">Centrocampistas (MF)</option>
+                    <option value="FW">Delanteros (FW)</option>
+                    <option value="DF">Defensas (DF)</option>
+                </select>
             </div>
-
-            <div class="form-group">
-                <label for="clubLevel">3. Perfil de Club Comprador:</label>
-                <select id="clubLevel">
-                    <option value="all">Cualquier origen (Sin filtro)</option>
-                    <option value="top">Top Europa (Ej: Atlético de Madrid)</option>
-                    <option value="mid">Nivel Medio / LaLiga (Ej: Osasuna)</option>
-                    <option value="low">Económico / Bronce (Ej: Shrewsbury Town)</option>
+            <div class="filter-item">
+                <label for="maxAge">Edad Máxima</label>
+                <select id="maxAge" onchange="calculateSimilarity()">
+                    <option value="100">Sin límite</option>
+                    <option value="23">Sub-23 (&le; 23)</option>
+                    <option value="25">Sub-25 (&le; 25)</option>
+                    <option value="28">Sub-28 (&le; 28)</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="minMinutes">Minutos Jugados (90s)</label>
+                <select id="minMinutes" onchange="calculateSimilarity()">
+                    <option value="5">Mínimo 5 partidos (&ge; 450 min)</option>
+                    <option value="10" selected>Mínimo 10 partidos (&ge; 900 min)</option>
+                    <option value="15">Mínimo 15 partidos (&ge; 1350 min)</option>
                 </select>
             </div>
         </div>
-
-        <button onclick="calculateSimilarity()">Escanear y Buscar Sustituto</button>
     </div>
 
-    <!-- Resultados -->
-    <div class="card" id="resultsCard" style="display:none;">
-        <h2>Candidatos Compatibles</h2>
-        <table id="resultsTable">
+    <div id="status" class="status">Cargando base de datos desde datos.csv...</div>
+
+    <div class="table-container">
+        <table>
             <thead>
                 <tr>
+                    <th>#</th>
                     <th>Jugador</th>
                     <th>Equipo</th>
+                    <th>Pos</th>
                     <th>Edad</th>
+                    <th>90s</th>
                     <th>Compatibilidad</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Se rellena dinámicamente con JavaScript -->
+            <tbody id="resultsBody">
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted);">
+                        Carga el archivo CSV e introduce un jugador para ver las recomendaciones.
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    // Datos de prueba por defecto si no se sube un CSV
-    const defaultData = [
-        { name: "Lucas Torró", team: "Osasuna", age: 31, aerialWon: 4.2, passCmp: 82.5, tackles: 1.4 },
-        { name: "Candidato A (Perfil Torró)", team: "Eibar", age: 24, aerialWon: 4.0, passCmp: 81.0, tackles: 1.5 },
-        { name: "Candidato B (Perfil Koke)", team: "Girona", age: 26, aerialWon: 1.1, passCmp: 89.2, tackles: 1.1 },
-        { name: "Candidato C (Perfil Económico)", team: "Shrewsbury Town", age: 22, aerialWon: 3.8, passCmp: 78.5, tackles: 1.6 }
-    ];
+    let playersData = [];
+    let numericalMetrics = [];
+
+    // Cargar y procesar el CSV automáticamente al iniciar
+    window.onload = function() {
+        Papa.parse("datos.csv", {
+            download: true,
+            header: true,
+            dynamicTyping: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                playersData = results.data;
+                if (playersData.length > 0) {
+                    identifyMetrics(playersData[0]);
+                    document.getElementById("status").innerText = `Base de datos cargada correctamente (${playersData.length} jugadores registrados).`;
+                } else {
+                    document.getElementById("status").innerText = "Error: El archivo datos.csv está vacío.";
+                }
+            },
+            error: function(err) {
+                document.getElementById("status").innerText = "Error al cargar datos.csv. Asegúrate de que el archivo existe en el repositorio.";
+            }
+        });
+    };
+
+    // Identificar automáticamente qué columnas son numéricas para la comparación de distancia
+    function identifyMetrics(sampleRow) {
+        const nonMetricCols = ['Player', 'Squad', 'Pos', 'Age', 'MP', '90s', 'Rk', 'Matches', 'Nation'];
+        numericalMetrics = Object.keys(sampleRow).filter(key => {
+            return !nonMetricCols.includes(key) && typeof sampleRow[key] === 'number';
+        });
+    }
+
+    // Normalización Z-score / Min-Max para comparar métricas en la misma escala
+    function getNormalizedStats(players) {
+        let stats = {};
+        numericalMetrics.forEach(metric => {
+            const values = players.map(p => p[metric] || 0);
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            stats[metric] = { min, max };
+        });
+        return stats;
+    }
 
     function calculateSimilarity() {
-        const targetName = document.getElementById('targetPlayer').value.trim();
-        const resultsTable = document.getElementById('resultsTable').querySelector('tbody');
-        const resultsCard = document.getElementById('resultsCard');
-
-        if (!targetName) {
+        const query = document.getElementById("targetPlayer").value.trim().toLowerCase();
+        if (!query) {
             alert("Por favor, introduce el nombre de un jugador.");
             return;
         }
 
-        // Buscar al jugador objetivo
-        const target = defaultData.find(p => p.name.toLowerCase().includes(targetName.toLowerCase()));
+        // Buscar al jugador objetivo en la base de datos
+        const target = playersData.find(p => p.Player && p.Player.toLowerCase().includes(query));
 
         if (!target) {
-            alert("Jugador no encontrado en la base de datos de prueba. Intenta con 'Lucas Torró'.");
+            document.getElementById("status").innerText = `No se encontró ningún jugador que coincida con "${query}".`;
             return;
         }
 
-        resultsTable.innerHTML = "";
+        document.getElementById("status").innerText = `Mostrando sustitutos similares para: ${target.Player} (${target.Squad})`;
 
-        // Algoritmo simplificado de distancia/similitud
-        const candidates = defaultData
-            .filter(p => p.name !== target.name)
-            .map(player => {
-                // Cálculo de diferencia entre métricas clave
-                const diffAerial = Math.abs(player.aerialWon - target.aerialWon);
-                const diffPass = Math.abs(player.passCmp - target.passCmp) / 10;
-                const diffTackles = Math.abs(player.tackles - target.tackles);
-                
-                const totalDiff = diffAerial + diffPass + diffTackles;
-                const matchScore = Math.max(0, Math.round(100 - (totalDiff * 15)));
+        // Filtros
+        const posFilter = document.getElementById("posFilter").value;
+        const maxAge = parseFloat(document.getElementById("maxAge").value);
+        const min90s = parseFloat(document.getElementById("minMinutes").value);
 
-                return { ...player, matchScore };
-            })
-            .sort((a, b) => b.matchScore - a.matchScore);
+        // Obtener rango de normalización
+        const normBounds = getNormalizedStats(playersData);
 
-        // Renderizar resultados en la tabla
-        candidates.forEach(c => {
-            const row = `<tr>
-                <td><strong>${c.name}</strong></td>
-                <td>${c.team}</td>
-                <td>${c.age}</td>
-                <td><span class="badge">${c.matchScore}%</span></td>
-            </tr>`;
-            resultsTable.innerHTML += row;
+        // Algoritmo de distancia euclidiana estandarizada
+        let scores = playersData.map(player => {
+            // Aplicar filtros
+            if (player.Player === target.Player) return null; // Excluir al propio objetivo
+            if (player['90s'] < min90s) return null;
+            if (player.Age > maxAge) return null;
+            if (posFilter !== 'ALL' && player.Pos && !player.Pos.includes(posFilter)) return null;
+
+            let sumSquaredDiffs = 0;
+            let validMetricsCount = 0;
+
+            numericalMetrics.forEach(metric => {
+                const bounds = normBounds[metric];
+                const range = bounds.max - bounds.min;
+
+                if (range > 0) {
+                    const targetVal = (target[metric] || 0) - bounds.min;
+                    const playerVal = (player[metric] || 0) - bounds.min;
+
+                    const normTarget = targetVal / range;
+                    const normPlayer = playerVal / range;
+
+                    sumSquaredDiffs += Math.pow(normTarget - normPlayer, 2);
+                    validMetricsCount++;
+                }
+            });
+
+            if (validMetricsCount === 0) return null;
+
+            const distance = Math.sqrt(sumSquaredDiffs / validMetricsCount);
+            // Convertir distancia (0 a 1) en porcentaje de compatibilidad (100% similitud)
+            const similarity = Math.max(0, 100 * (1 - distance));
+
+            return {
+                player: player,
+                similarity: similarity.toFixed(1)
+            };
+        }).filter(item => item !== null);
+
+        // Ordenar de mayor a menor compatibilidad
+        scores.sort((a, b) => b.similarity - a.similarity);
+
+        renderResults(scores.slice(0, 15)); // Mostrar Top 15
+    }
+
+    function renderResults(results) {
+        const tbody = document.getElementById("resultsBody");
+        tbody.innerHTML = "";
+
+        if (results.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No se encontraron sustitutos que cumplan los filtros seleccionados.</td></tr>`;
+            return;
+        }
+
+        results.forEach((item, index) => {
+            const p = item.player;
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td><strong>${p.Player}</strong></td>
+                <td>${p.Squad || 'N/A'}</td>
+                <td><span class="tag-pos">${p.Pos || 'N/A'}</span></td>
+                <td>${p.Age || 'N/A'}</td>
+                <td>${p.90s ? p.90s.toFixed(1) : 'N/A'}</td>
+                <td><span class="badge">${item.similarity}%</span></td>
+            `;
+
+            tbody.appendChild(row);
         });
-
-        resultsCard.style.display = "block";
     }
 </script>
 
