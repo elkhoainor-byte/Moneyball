@@ -17,7 +17,7 @@ print(f"Jugadores de Transfermarkt cargados: {len(tm)}")
 
 print("Leyendo datos.csv de FBRef...")
 
-# Intentamos varias codificaciones
+# Intentamos varias codificaciones de forma más tolerante
 encodings_to_try = ["utf-8", "utf-8-sig", "latin1", "cp1252", "iso-8859-1"]
 
 raw = None
@@ -32,30 +32,40 @@ for enc in encodings_to_try:
             sep=";",
             engine="python",
             on_bad_lines="skip",
-            encoding=enc
+            encoding=enc,
+            encoding_errors="replace"   # Reemplaza caracteres problemáticos en vez de fallar
         )
-        # Comprobamos si hay caracteres raros
-        sample = str(temp.iloc[2:6].values)
-        if "�" not in sample and len(temp.columns) > 5:
+        if len(temp.columns) > 3:
             raw = temp
             used_encoding = enc
-            print(f"¡Encoding correcto encontrado: {enc}")
+            print(f"Encoding aceptado: {enc}")
             break
     except Exception as e:
         print(f"Falló con {enc}: {e}")
         continue
 
 if raw is None:
-    raise Exception("No se pudo leer el CSV con ninguna codificación")
+    # Último intento muy agresivo
+    print("Último intento con latin1 + replace...")
+    raw = pd.read_csv(
+        "datos.csv",
+        header=None,
+        sep=";",
+        engine="python",
+        on_bad_lines="skip",
+        encoding="latin1",
+        encoding_errors="replace"
+    )
+    used_encoding = "latin1 (forzado)"
 
 print(f"Usando encoding: {used_encoding}")
 print(f"Filas leídas: {len(raw)}")
-print("Muestra de nombres:")
-print(raw.iloc[2:6, 0].tolist())
+print("Muestra de las primeras filas:")
+print(raw.head(6))
 
 # Buscar cabecera
 header_row_index = None
-for i in range(min(20, len(raw))):
+for i in range(min(25, len(raw))):
     row_as_str = raw.iloc[i].astype(str).str.lower().str.strip()
     if row_as_str.str.contains("player").any():
         header_row_index = i
@@ -77,7 +87,7 @@ fbref = fbref[fbref["Player"].astype(str).str.lower().str.strip() != "player"]
 
 print(f"Jugadores de FBRef cargados: {len(fbref)}")
 print("Ejemplos de nombres:")
-print(fbref["Player"].head(10).tolist())
+print(fbref["Player"].head(12).tolist())
 
 # Matching
 fbref["name_clean"] = fbref["Player"].astype(str).str.lower().str.strip()
@@ -106,7 +116,7 @@ cols_to_drop = [c for c in merged.columns if "name_clean" in str(c) or c == "mat
 merged = merged.drop(columns=cols_to_drop, errors="ignore")
 merged = merged.rename(columns={"market_value_in_eur": "MarketValue"})
 
-# Guardar forzosamente en UTF-8 con BOM (mejor compatibilidad)
+# Guardar en UTF-8
 merged.to_csv("datos_con_valor.csv", index=False, sep=";", encoding="utf-8-sig")
 
 matched = merged["MarketValue"].notna().sum()
