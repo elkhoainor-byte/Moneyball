@@ -76,7 +76,7 @@ tr:hover td{background:rgba(56,189,248,0.05)}
 </div>
 </div>
 
-<div id="status" class="status">Cargando base de datos desde datos.csv...</div>
+<div id="status" class="status">Cargando base de datos...</div>
 
 <div class="table-container">
 <table>
@@ -110,68 +110,71 @@ window.onload = function() {
         skipEmptyLines: true,
         complete: function(results) {
             const raw = results.data;
-            console.log("Primeras 5 filas del CSV:", raw.slice(0, 5));
+            console.log("=== PRIMERAS 8 FILAS DEL CSV ===");
+            console.log(raw.slice(0, 8));
 
-            // Buscamos la fila que contenga la palabra "Player" (más flexible)
+            // Busqueda flexible de la fila de cabecera
             let headerRowIndex = -1;
-            for (let i = 0; i < Math.min(15, raw.length); i++) {
+            for (let i = 0; i < Math.min(20, raw.length); i++) {
                 const row = raw[i];
                 if (!row) continue;
 
-                const found = row.some(cell => {
-                    const text = String(cell || "").toLowerCase().trim();
-                    return text === "player" || text.includes("player");
-                });
-
-                if (found) {
-                    headerRowIndex = i;
-                    break;
+                for (let j = 0; j < row.length; j++) {
+                    const text = String(row[j] || "").toLowerCase().replace(/\n/g, " ").trim();
+                    if (text === "player" || text.indexOf("player") === 0) {
+                        headerRowIndex = i;
+                        break;
+                    }
                 }
+                if (headerRowIndex !== -1) break;
             }
 
             if (headerRowIndex === -1) {
-                document.getElementById("status").innerText = "No se encontró la cabecera Player";
-                console.error("No se encontró fila con 'Player'. Revisa las primeras filas en la consola.");
+                document.getElementById("status").innerText = "ERROR: No se encontro la columna Player. Mira la consola (F12).";
                 return;
             }
 
-            console.log("Cabecera encontrada en la fila:", headerRowIndex);
+            console.log("Cabecera encontrada en fila numero:", headerRowIndex);
 
-            const headers = raw[headerRowIndex].map(h => String(h || "").trim().replace(/\n/g, " "));
+            const headers = raw[headerRowIndex].map(function(h) {
+                return String(h || "").replace(/\n/g, " ").trim();
+            });
+
+            console.log("Headers detectados:", headers);
+
             const dataRows = raw.slice(headerRowIndex + 1);
 
-            playersData = dataRows.map(row => {
+            playersData = dataRows.map(function(row) {
                 const obj = {};
-                headers.forEach((header, idx) => {
-                    if (header && header !== "") {
-                        obj[header] = row[idx];
-                    }
+                headers.forEach(function(header, idx) {
+                    if (header) obj[header] = row[idx];
                 });
                 return obj;
-            }).filter(p => p.Player && String(p.Player).trim() !== "" && String(p.Player).toLowerCase() !== "player");
+            }).filter(function(p) {
+                return p.Player && String(p.Player).trim() !== "" && String(p.Player).toLowerCase() !== "player";
+            });
 
             if (playersData.length > 0) {
                 identifyMetrics(playersData[0]);
-                document.getElementById("status").innerText = "Base de datos cargada correctamente (" + playersData.length + " jugadores).";
-                console.log("Columnas detectadas:", Object.keys(playersData[0]));
-                console.log("Primer jugador:", playersData[0]);
+                document.getElementById("status").innerText = "Base de datos cargada (" + playersData.length + " jugadores)";
+                console.log("Primer jugador cargado:", playersData[0]);
             } else {
-                document.getElementById("status").innerText = "Error: no se cargaron jugadores válidos.";
+                document.getElementById("status").innerText = "Error: 0 jugadores validos";
             }
         },
         error: function(err) {
-            document.getElementById("status").innerText = "Error al cargar datos.csv";
+            document.getElementById("status").innerText = "Error al cargar el CSV";
             console.error(err);
         }
     });
 };
 
 function identifyMetrics(sampleRow) {
-    const nonMetricCols = ["Player", "Nation", "Pos", "Squad", "Age", "Born", "MP", "Starts", "Min", "90s", "Rk", "Matches"];
+    const nonMetricCols = ["Player","Nation","Pos","Squad","Age","Born","MP","Starts","Min","90s","Rk","Matches"];
     numericalMetrics = Object.keys(sampleRow).filter(function(key) {
         return nonMetricCols.indexOf(key) === -1 && typeof sampleRow[key] === "number";
     });
-    console.log("Métricas numéricas:", numericalMetrics);
+    console.log("Metricas numericas:", numericalMetrics);
 }
 
 function getNormalizedStats(players) {
@@ -197,7 +200,7 @@ function calculateSimilarity() {
     });
 
     if (!target) {
-        document.getElementById("status").innerText = "No se encontró ningún jugador con \"" + query + "\"";
+        document.getElementById("status").innerText = "No se encontro ningun jugador con \"" + query + "\"";
         return;
     }
 
